@@ -1,20 +1,8 @@
 import {
-  ApiConfig, ApiResponse, CreateOrderParams, GetUserOrdersParams,
+  ApiConfig, ApiResponse, GetUserOrdersParams,
   OrderBookParams, GetUserOrderByPoolIdParams, OrdersListingByPoolParams,
 } from './types.js';
 import { buildHeaders, buildQuery, handleResponse } from './helpers.js';
-
-export async function createOrder(
-  params: CreateOrderParams,
-  config: ApiConfig
-): Promise<ApiResponse> {
-  const res = await fetch(`${config.apiUrl}/orders/create-order`, {
-    method: 'POST',
-    headers: buildHeaders(config, 'application/json'),
-    body: JSON.stringify(params),
-  });
-  return handleResponse(res);
-}
 
 export async function getUserOrders(
   params: GetUserOrdersParams,

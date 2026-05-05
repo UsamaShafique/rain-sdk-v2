@@ -1,22 +1,10 @@
 import {
-  ApiConfig, ApiResponse, CreatePoolParams, PublicPoolsParams, PrivatePoolsParams,
+  ApiConfig, ApiResponse, PublicPoolsParams, PrivatePoolsParams,
   PoolListingByCreatorParams, VerifyAccessCodeParams, PoolTotalParticipantsParams,
   SearchPoolParams, RelatedPoolsParams, UpdateStreamingParams,
   UpdatePoolResolutionTimeParams, FindPoolFallbackParams, SignOraclesExtendTimeParams,
 } from './types.js';
 import { buildHeaders, buildQuery, handleResponse } from './helpers.js';
-
-export async function createPool(
-  params: CreatePoolParams,
-  config: ApiConfig
-): Promise<ApiResponse> {
-  const res = await fetch(`${config.apiUrl}/pools/create-pool`, {
-    method: 'POST',
-    headers: buildHeaders(config, 'application/json'),
-    body: JSON.stringify(params),
-  });
-  return handleResponse(res);
-}
 
 export async function accessPool(
   params: { poolId: string; accessCode: string },
