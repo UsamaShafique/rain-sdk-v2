@@ -6,6 +6,7 @@ import { RawTransaction } from './tx/types.js';
 export class RainAA {
     private config: RainConfig;
     private _client: any | null = null;
+    private _account: any | null = null;
     private _address: `0x${string}` | null = null;
 
     constructor(config: RainConfig) {
@@ -66,6 +67,7 @@ export class RainAA {
             }
 
             this._client = client;
+            this._account = account;
             this._address = account.address;
 
             return account.address;
@@ -100,15 +102,24 @@ export class RainAA {
      * Sends a raw transaction from the smart account.
      */
     async sendTransaction(rawTx: RawTransaction): Promise<`0x${string}`> {
-        if (!this._client) {
+        if (!this._client || !this._account) {
             throw new Error('Rain not connected. Call rain.connect() first.');
         }
-        const hash = await this._client.sendTransaction({
-            to: rawTx.to,
-            data: rawTx.data,
-            value: rawTx.value,
+
+        // @account-kit/wallet-client v4.x uses standalone sendCalls function
+        // @ts-ignore - optional peer dependency
+        const { sendCalls } = await import('@account-kit/wallet-client');
+
+        const result = await sendCalls(this._client, {
+            account: this._account,
+            calls: [{
+                to: rawTx.to,
+                data: rawTx.data,
+                value: rawTx.value ?? 0n,
+            }],
         });
-        return hash;
+
+        return result as `0x${string}`;
     }
 
     /**
@@ -116,6 +127,7 @@ export class RainAA {
      */
     disconnect() {
         this._client = null;
+        this._account = null;
         this._address = null;
     }
 }
