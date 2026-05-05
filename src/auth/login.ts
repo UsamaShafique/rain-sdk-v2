@@ -7,7 +7,10 @@ export async function loginUser(
 
   const res = await fetch(`${apiUrl}/auth/login-or-register-with-walletAddress`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(apiUrl.includes('ngrok') ? { 'ngrok-skip-browser-warning': 'true' } : {}),
+    },
     body: JSON.stringify({
       sign: signature,
       walletAddress,

@@ -21,6 +21,19 @@ import { getUserOptionLPShares } from './markets/getUserOptionLPShares.js';
 import { getUserOptionShares } from './markets/getUserOptionShares.js';
 import { createPublicClient, http, parseAbi } from 'viem';
 import { arbitrum } from 'viem/chains';
+import type { ApiConfig, UserProfileUpdateParams, UserHistoryParams, CreateCommentParams, CommentsListingParams, UpdateCommentParams, CommentCountParams, CreatePoolParams, PublicPoolsParams, PrivatePoolsParams, PoolListingByCreatorParams, VerifyAccessCodeParams, PoolTotalParticipantsParams, SearchPoolParams, RelatedPoolsParams, UpdateStreamingParams, UpdatePoolResolutionTimeParams, FindPoolFallbackParams, SignOraclesExtendTimeParams, UserTotalInvestmentParams, OptionsTotalVolumeParams, PoolActivityParams, TopHoldersParams, UserInvestedPoolsParams, InvestmentVolumeGraphParams, UserPnlGraphParams, TopWinnersLosersParams, PnlByPoolIdParams, PriceDataParams, AddReviewParams, CreateOrderParams, GetUserOrdersParams, OrderBookParams, GetUserOrderByPoolIdParams, OrdersListingByPoolParams, AddUserPointsParams, UserOnboardingParams, PointsGraphParams, GetNotificationsParams, MarkNotificationAsReadParams, CreateDisputeMessageParams, GetPoolDisputeConvoParams, FollowToggleParams, FollowCheckParams, FollowListParams, FollowStatsParams, RainBurnPerPoolParams } from './api/types.js';
+import * as usersApi from './api/users.js';
+import * as commentsApi from './api/comments.js';
+import * as poolsApi from './api/pools.js';
+import * as investmentsApi from './api/investments.js';
+import * as priceDataApi from './api/priceData.js';
+import * as poolReviewsApi from './api/poolReviews.js';
+import * as ordersApi from './api/orders.js';
+import * as pointsApi from './api/points.js';
+import * as notificationsApi from './api/notifications.js';
+import * as rainBurnApi from './api/rainBurn.js';
+import * as disputeApi from './api/dispute.js';
+import * as followApi from './api/follow.js';
 
 const erc20AllowanceAbi = parseAbi(['function allowance(address owner, address spender) view returns (uint256)']);
 
@@ -193,5 +206,343 @@ export class Rain {
 
   getEnvironmentConfig() {
     return ENV_CONFIG[this.environment];
+  }
+
+  // ─── Helper ──────────────────────────────────────────────────────────────────
+
+  private cfg(accessToken?: string): ApiConfig {
+    return { apiUrl: this.apiUrl, accessToken };
+  }
+
+  // ─── Users ───────────────────────────────────────────────────────────────────
+
+  async findUserByWalletAddress(params: { walletAddress: string }, accessToken?: string) {
+    return usersApi.findUserByWalletAddress(params, this.cfg(accessToken));
+  }
+
+  async updateUserProfile(params: UserProfileUpdateParams, accessToken: string) {
+    return usersApi.updateUserProfile(params, this.cfg(accessToken));
+  }
+
+  async getUserProfile(accessToken: string) {
+    return usersApi.getUserProfile(this.cfg(accessToken));
+  }
+
+  async getUsersTotalCount() {
+    return usersApi.getUsersTotalCount(this.cfg());
+  }
+
+  async removeUserProfilePic(accessToken: string) {
+    return usersApi.removeUserProfilePic(this.cfg(accessToken));
+  }
+
+  async getUserHistory(params: UserHistoryParams, accessToken: string) {
+    return usersApi.getUserHistory(params, this.cfg(accessToken));
+  }
+
+  // ─── Comments ────────────────────────────────────────────────────────────────
+
+  async createComment(params: CreateCommentParams, accessToken: string) {
+    return commentsApi.createComment(params, this.cfg(accessToken));
+  }
+
+  async getCommentsListing(params: CommentsListingParams, accessToken?: string) {
+    return commentsApi.getCommentsListing(params, this.cfg(accessToken));
+  }
+
+  async updateComment(params: UpdateCommentParams, accessToken: string) {
+    return commentsApi.updateComment(params, this.cfg(accessToken));
+  }
+
+  async likeComment(params: { commentId: string }, accessToken: string) {
+    return commentsApi.likeComment(params, this.cfg(accessToken));
+  }
+
+  async unlikeComment(params: { commentId: string }, accessToken: string) {
+    return commentsApi.unlikeComment(params, this.cfg(accessToken));
+  }
+
+  async getCommentsCount(params: CommentCountParams, accessToken?: string) {
+    return commentsApi.getCommentsCount(params, this.cfg(accessToken));
+  }
+
+  // ─── Pools ───────────────────────────────────────────────────────────────────
+
+  async createPool(params: CreatePoolParams, accessToken: string) {
+    return poolsApi.createPool(params, this.cfg(accessToken));
+  }
+
+  async accessPool(params: { poolId: string; accessCode: string }, accessToken?: string) {
+    return poolsApi.accessPool(params, this.cfg(accessToken));
+  }
+
+  async getPublicPools(params: PublicPoolsParams, accessToken?: string) {
+    return poolsApi.getPublicPools(params, this.cfg(accessToken));
+  }
+
+  async getPrivatePools(params: PrivatePoolsParams, accessToken?: string) {
+    return poolsApi.getPrivatePools(params, this.cfg(accessToken));
+  }
+
+  async getPoolById(params: { id: string }, accessToken?: string) {
+    return poolsApi.getPoolById(params, this.cfg(accessToken));
+  }
+
+  async getPoolByContractAddress(params: { contractAddress: string }, accessToken?: string) {
+    return poolsApi.getPoolByContractAddress(params, this.cfg(accessToken));
+  }
+
+  async searchPool(params: SearchPoolParams, accessToken?: string) {
+    return poolsApi.searchPool(params, this.cfg(accessToken));
+  }
+
+  async verifyAccessCode(params: VerifyAccessCodeParams, accessToken?: string) {
+    return poolsApi.verifyAccessCode(params, this.cfg(accessToken));
+  }
+
+  async getPoolListingByCreator(params: PoolListingByCreatorParams, accessToken: string) {
+    return poolsApi.getPoolListingByCreator(params, this.cfg(accessToken));
+  }
+
+  async searchPoolById(params: { poolId: string }, accessToken?: string) {
+    return poolsApi.searchPoolById(params, this.cfg(accessToken));
+  }
+
+  async getPoolTotalParticipants(params: PoolTotalParticipantsParams, accessToken?: string) {
+    return poolsApi.getPoolTotalParticipants(params, this.cfg(accessToken));
+  }
+
+  async getTotalPoolsByUser(accessToken: string) {
+    return poolsApi.getTotalPoolsByUser(this.cfg(accessToken));
+  }
+
+  async signOraclesExtendTime(params: SignOraclesExtendTimeParams, accessToken: string) {
+    return poolsApi.signOraclesExtendTime(params, this.cfg(accessToken));
+  }
+
+  async getTotalPredictionsByUser(accessToken: string) {
+    return poolsApi.getTotalPredictionsByUser(this.cfg(accessToken));
+  }
+
+  async updateStreaming(params: UpdateStreamingParams, accessToken: string) {
+    return poolsApi.updateStreaming(params, this.cfg(accessToken));
+  }
+
+  async getAllPoolsCount(accessToken?: string) {
+    return poolsApi.getAllPoolsCount(this.cfg(accessToken));
+  }
+
+  async getRelatedPools(params: RelatedPoolsParams, accessToken?: string) {
+    return poolsApi.getRelatedPools(params, this.cfg(accessToken));
+  }
+
+  async getPoolResolutionHistory(params: { poolId: string }, accessToken?: string) {
+    return poolsApi.getPoolResolutionHistory(params, this.cfg(accessToken));
+  }
+
+  async updatePoolResolutionTime(params: UpdatePoolResolutionTimeParams, accessToken: string) {
+    return poolsApi.updatePoolResolutionTime(params, this.cfg(accessToken));
+  }
+
+  async findPoolFallback(params: FindPoolFallbackParams, accessToken: string) {
+    return poolsApi.findPoolFallback(params, this.cfg(accessToken));
+  }
+
+  async getFeaturedPools(accessToken?: string) {
+    return poolsApi.getFeaturedPools(this.cfg(accessToken));
+  }
+
+  // ─── Investments ─────────────────────────────────────────────────────────────
+
+  async getUserTotalInvestment(params: UserTotalInvestmentParams, accessToken: string) {
+    return investmentsApi.getUserTotalInvestment(params, this.cfg(accessToken));
+  }
+
+  async getOptionsTotalVolume(params: OptionsTotalVolumeParams, accessToken?: string) {
+    return investmentsApi.getOptionsTotalVolume(params, this.cfg(accessToken));
+  }
+
+  async getPoolActivity(params: PoolActivityParams, accessToken?: string) {
+    return investmentsApi.getPoolActivity(params, this.cfg(accessToken));
+  }
+
+  async getTopHolders(params: TopHoldersParams, accessToken?: string) {
+    return investmentsApi.getTopHolders(params, this.cfg(accessToken));
+  }
+
+  async getUserInvestedPools(params: UserInvestedPoolsParams, accessToken: string) {
+    return investmentsApi.getUserInvestedPools(params, this.cfg(accessToken));
+  }
+
+  async getPlatformTVL(accessToken?: string) {
+    return investmentsApi.getPlatformTVL(this.cfg(accessToken));
+  }
+
+  async getInvestmentVolumeGraph(params: InvestmentVolumeGraphParams, accessToken?: string) {
+    return investmentsApi.getInvestmentVolumeGraph(params, this.cfg(accessToken));
+  }
+
+  async calculateUserPNL(accessToken: string) {
+    return investmentsApi.calculateUserPNL(this.cfg(accessToken));
+  }
+
+  async calculateUserTotalVolume(accessToken: string) {
+    return investmentsApi.calculateUserTotalVolume(this.cfg(accessToken));
+  }
+
+  async getUserPnlGraph(params: UserPnlGraphParams, accessToken: string) {
+    return investmentsApi.getUserPnlGraph(params, this.cfg(accessToken));
+  }
+
+  async getTVLGraph(accessToken?: string) {
+    return investmentsApi.getTVLGraph(this.cfg(accessToken));
+  }
+
+  async calculateUserPNLPerPool(accessToken: string) {
+    return investmentsApi.calculateUserPNLPerPool(this.cfg(accessToken));
+  }
+
+  async getPnlByPoolId(params: PnlByPoolIdParams, accessToken: string) {
+    return investmentsApi.getPnlByPoolId(params, this.cfg(accessToken));
+  }
+
+  async getTopWinnersLosers(params: TopWinnersLosersParams, accessToken?: string) {
+    return investmentsApi.getTopWinnersLosers(params, this.cfg(accessToken));
+  }
+
+  async getUserOverallInvestment(accessToken: string) {
+    return investmentsApi.getUserOverallInvestment(this.cfg(accessToken));
+  }
+
+  async getPlatformVolume(accessToken?: string) {
+    return investmentsApi.getPlatformVolume(this.cfg(accessToken));
+  }
+
+  async getUserInvestedLivePoolsCount(accessToken: string) {
+    return investmentsApi.getUserInvestedLivePoolsCount(this.cfg(accessToken));
+  }
+
+  async calculateUserOpenInterest(accessToken: string) {
+    return investmentsApi.calculateUserOpenInterest(this.cfg(accessToken));
+  }
+
+  // ─── Price Data ──────────────────────────────────────────────────────────────
+
+  async getPriceData(params: PriceDataParams, accessToken?: string) {
+    return priceDataApi.getPriceData(params, this.cfg(accessToken));
+  }
+
+  // ─── Pool Reviews ────────────────────────────────────────────────────────────
+
+  async addReview(params: AddReviewParams, accessToken: string) {
+    return poolReviewsApi.addReview(params, this.cfg(accessToken));
+  }
+
+  async getUserReviews(accessToken: string) {
+    return poolReviewsApi.getUserReviews(this.cfg(accessToken));
+  }
+
+  async getPoolsByCreatorReviews(accessToken: string) {
+    return poolReviewsApi.getPoolsByCreatorReviews(this.cfg(accessToken));
+  }
+
+  // ─── Orders ──────────────────────────────────────────────────────────────────
+
+  async createOrder(params: CreateOrderParams, accessToken: string) {
+    return ordersApi.createOrder(params, this.cfg(accessToken));
+  }
+
+  async getUserOrders(params: GetUserOrdersParams, accessToken: string) {
+    return ordersApi.getUserOrders(params, this.cfg(accessToken));
+  }
+
+  async getOrderBook(params: OrderBookParams, accessToken?: string) {
+    return ordersApi.getOrderBook(params, this.cfg(accessToken));
+  }
+
+  async getUserOrderByPoolId(params: GetUserOrderByPoolIdParams, accessToken: string) {
+    return ordersApi.getUserOrderByPoolId(params, this.cfg(accessToken));
+  }
+
+  async getOrdersListingByPool(params: OrdersListingByPoolParams, accessToken?: string) {
+    return ordersApi.getOrdersListingByPool(params, this.cfg(accessToken));
+  }
+
+  async getOrderById(params: { orderId: string }, accessToken: string) {
+    return ordersApi.getOrderById(params, this.cfg(accessToken));
+  }
+
+  // ─── Points ──────────────────────────────────────────────────────────────────
+
+  async addUserPoints(params: AddUserPointsParams, accessToken: string) {
+    return pointsApi.addUserPoints(params, this.cfg(accessToken));
+  }
+
+  async getUserPoints(accessToken: string) {
+    return pointsApi.getUserPoints(this.cfg(accessToken));
+  }
+
+  async userSuccessfulOnboarding(params: UserOnboardingParams, accessToken: string) {
+    return pointsApi.userSuccessfulOnboarding(params, this.cfg(accessToken));
+  }
+
+  async getUserPointsGraph(params: PointsGraphParams, accessToken: string) {
+    return pointsApi.getUserPointsGraph(params, this.cfg(accessToken));
+  }
+
+  // ─── Notifications ───────────────────────────────────────────────────────────
+
+  async getNotifications(params: GetNotificationsParams, accessToken: string) {
+    return notificationsApi.getNotifications(params, this.cfg(accessToken));
+  }
+
+  async markAllNotificationsAsRead(accessToken: string) {
+    return notificationsApi.markAllNotificationsAsRead(this.cfg(accessToken));
+  }
+
+  async markNotificationAsRead(params: MarkNotificationAsReadParams, accessToken: string) {
+    return notificationsApi.markNotificationAsRead(params, this.cfg(accessToken));
+  }
+
+  // ─── Rain Burn ───────────────────────────────────────────────────────────────
+
+  async getTotalBurned(accessToken?: string) {
+    return rainBurnApi.getTotalBurned(this.cfg(accessToken));
+  }
+
+  async getBurnPerPool(params: RainBurnPerPoolParams, accessToken?: string) {
+    return rainBurnApi.getBurnPerPool(params, this.cfg(accessToken));
+  }
+
+  // ─── Dispute ─────────────────────────────────────────────────────────────────
+
+  async createDisputeMessage(params: CreateDisputeMessageParams, accessToken: string) {
+    return disputeApi.createDisputeMessage(params, this.cfg(accessToken));
+  }
+
+  async getPoolDisputeConvo(params: GetPoolDisputeConvoParams, accessToken?: string) {
+    return disputeApi.getPoolDisputeConvo(params, this.cfg(accessToken));
+  }
+
+  // ─── Follow ──────────────────────────────────────────────────────────────────
+
+  async toggleFollow(params: FollowToggleParams, accessToken: string) {
+    return followApi.toggleFollow(params, this.cfg(accessToken));
+  }
+
+  async checkFollow(params: FollowCheckParams, accessToken: string) {
+    return followApi.checkFollow(params, this.cfg(accessToken));
+  }
+
+  async getFollowers(params: FollowListParams, accessToken?: string) {
+    return followApi.getFollowers(params, this.cfg(accessToken));
+  }
+
+  async getFollowing(params: FollowListParams, accessToken?: string) {
+    return followApi.getFollowing(params, this.cfg(accessToken));
+  }
+
+  async getFollowStats(params: FollowStatsParams, accessToken?: string) {
+    return followApi.getFollowStats(params, this.cfg(accessToken));
   }
 }

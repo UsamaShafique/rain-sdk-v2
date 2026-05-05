@@ -15,7 +15,7 @@ export const USDT_SYMBOL_PROD = "USD₮0";
 
 export const ENV_CONFIG = {
     development: {
-        apiUrl: "https://dev-api.rain.one",
+        apiUrl: "http://192.168.18.81:3000",
         market_factory_address: "0xBD99441C4116b85dFecA2d6521EC0e2Eb62F0adE" as `0x${string}`,
         dispute_initial_timer: 1 * 60,
         oracle_fixed_fee_per_option: 1_000_000n, // $1 per option (6 decimals)
