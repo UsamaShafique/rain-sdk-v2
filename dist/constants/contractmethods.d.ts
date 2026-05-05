@@ -1,0 +1,15 @@
+export declare const APPROVE_TOKEN = "approve";
+export declare const CREATE_MARKET = "createPool";
+export declare const ENTER_OPTION = "enterOption";
+export declare const ENTER_LIQUIDITY = "enterLiquidity";
+export declare const REMOVE_LIQUIDITY = "removeLiquidity";
+export declare const SPLIT = "split";
+export declare const MERGE = "merge";
+export declare const CLOSE_POOL = "closePool";
+export declare const CHOOSE_WINNER = "chooseWinner";
+export declare const PLACE_BUY_ORDER = "placeBuyOrder";
+export declare const PLACE_SELL_ORDER = "placeSellOrder";
+export declare const OPEN_DISPUTE = "openDispute";
+export declare const CLAIM = "claim";
+export declare const CANCEL_BUY_ORDERS = "cancelBuyOrders";
+export declare const CANCEL_SELL_ORDERS = "cancelSellOrders";

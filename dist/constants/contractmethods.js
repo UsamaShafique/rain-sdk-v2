@@ -1,0 +1,15 @@
+export const APPROVE_TOKEN = 'approve';
+export const CREATE_MARKET = 'createPool';
+export const ENTER_OPTION = 'enterOption';
+export const ENTER_LIQUIDITY = 'enterLiquidity';
+export const REMOVE_LIQUIDITY = 'removeLiquidity';
+export const SPLIT = 'split';
+export const MERGE = 'merge';
+export const CLOSE_POOL = 'closePool';
+export const CHOOSE_WINNER = 'chooseWinner';
+export const PLACE_BUY_ORDER = 'placeBuyOrder';
+export const PLACE_SELL_ORDER = 'placeSellOrder';
+export const OPEN_DISPUTE = 'openDispute';
+export const CLAIM = 'claim';
+export const CANCEL_BUY_ORDERS = 'cancelBuyOrders';
+export const CANCEL_SELL_ORDERS = 'cancelSellOrders';

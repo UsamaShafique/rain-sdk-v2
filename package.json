@@ -1,0 +1,59 @@
+{
+    "name": "@buidlrrr/rain-sdk-v2",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Rain SDK V2 - Wallet Connection & Market Creation",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc -w"
+    },
+    "keywords": [
+        "web3",
+        "account-abstraction",
+        "smart-account",
+        "rain",
+        "viem",
+        "alchemy"
+    ],
+    "author": "Rain Protocol",
+    "license": "MIT",
+    "peerDependencies": {
+        "@account-kit/infra": "^4.48.0",
+        "@account-kit/wallet-client": "^0.1.0-alpha.10",
+        "@alchemy/aa-alchemy": "^3.0.0",
+        "@alchemy/aa-core": "^3.0.0",
+        "viem": "^2.0.0"
+    },
+    "peerDependenciesMeta": {
+        "@account-kit/infra": {
+            "optional": true
+        },
+        "@account-kit/wallet-client": {
+            "optional": true
+        },
+        "@alchemy/aa-alchemy": {
+            "optional": true
+        },
+        "@alchemy/aa-core": {
+            "optional": true
+        }
+    },
+    "dependencies": {
+        "ethers": "^6.16.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.3",
+        "viem": "^2.48.8"
+    }
+}
