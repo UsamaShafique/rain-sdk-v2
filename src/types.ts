@@ -9,7 +9,7 @@ export interface RainConfig {
   rpcUrl?: string;
 }
 
-export type RainEnvironment = "development" | "stage" | "production";
+export type RainEnvironment = "development"; // | "stage" | "production";
 export interface RainCoreConfig {
   environment?: RainEnvironment;
   rpcUrl?: string;
