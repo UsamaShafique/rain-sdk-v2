@@ -5,7 +5,7 @@ TypeScript SDK for the Rain prediction markets protocol on Arbitrum One. Provide
 ## Installation
 
 ```bash
-npm install @buidlrrr/rain-sdk-v2 viem
+npm install rain-sdk-v2 viem
 ```
 
 ### Optional (for Smart Account / Account Abstraction)
@@ -17,7 +17,7 @@ npm install @alchemy/aa-core @account-kit/infra @account-kit/wallet-client
 ## Quick Start
 
 ```typescript
-import { Rain, RainAA, TradingModel, OptionSide } from '@buidlrrr/rain-sdk-v2';
+import { Rain, RainAA, TradingModel, OptionSide } from 'rain-sdk-v2';
 import { createWalletClient, custom, parseUnits, parseEther } from 'viem';
 import { arbitrum } from 'viem/chains';
 
@@ -621,6 +621,451 @@ If disputed:
 6b. Open Dispute (buildOpenDisputeTx)
 6c. Appeal (buildOpenDisputeTx again)
 ```
+
+---
+
+## REST API Methods
+
+The SDK wraps all Rain backend REST API endpoints. Each method requires `accessToken` for authenticated routes.
+
+### Users
+
+```typescript
+// Find user by wallet address (public)
+const user = await rain.findUserByWalletAddress({ walletAddress: '0x...' });
+
+// Get authenticated user's profile
+const profile = await rain.getUserProfile(accessToken);
+
+// View another user's profile
+const profile = await rain.viewUserProfile({ userId: '...' }, accessToken);
+
+// Update profile
+await rain.updateUserProfile({
+  name: 'John',
+  bio: 'Trader',
+  profilePic: 'https://...',
+  twitterLink: 'https://...',
+}, accessToken);
+
+// Get total user count (public)
+const count = await rain.getUsersTotalCount();
+
+// Remove profile picture
+await rain.removeUserProfilePic(accessToken);
+
+// Get user activity history (deposits, withdrawals, trades, rewards)
+const history = await rain.getUserHistory({ limit: 20, offset: 1 }, accessToken);
+
+// Check if access token is still valid
+const status = await rain.checkTokenExpiration(accessToken);
+```
+
+### Comments
+
+```typescript
+// Create a comment
+await rain.createComment({ comment: 'Great market!', poolId: '...' }, accessToken);
+
+// Reply to a comment
+await rain.createComment({ comment: 'I agree', poolId: '...', parentCommentId: '...' }, accessToken);
+
+// Get comments for a pool
+const comments = await rain.getCommentsListing({ poolId: '...', limit: 10, offset: 0 });
+
+// Update a comment
+await rain.updateComment({ commentId: '...', comment: 'Updated text' }, accessToken);
+
+// Like / Unlike a comment
+await rain.likeComment({ commentId: '...' }, accessToken);
+await rain.unlikeComment({ commentId: '...' }, accessToken);
+
+// Get comment count for a pool
+const count = await rain.getCommentsCount({ poolId: '...' });
+```
+
+### Pools
+
+```typescript
+// Get public pools (paginated, filterable)
+const pools = await rain.getPublicPools({ limit: 10, offset: 0, status: 'Live', sortBy: 'trending' });
+
+// Get private pools
+const pools = await rain.getPrivatePools({ limit: 10, offset: 0 }, accessToken);
+
+// Get pool by ID
+const pool = await rain.getPoolById({ id: '...' });
+
+// Get pool by contract address
+const pool = await rain.getPoolByContractAddress({ contractAddress: '0x...' });
+
+// Search pools
+const results = await rain.searchPool({ query: 'bitcoin', limit: 10, offset: 0 });
+
+// Get featured pools
+const featured = await rain.getFeaturedPools({ limit: 10, offset: 0 });
+
+// Get all pools count
+const count = await rain.getAllPoolsCount();
+
+// Get related pools
+const related = await rain.getRelatedPools({ poolId: '...' });
+
+// Get pool resolution history (per sub-pool)
+const history = await rain.getPoolResolutionHistory({ poolId: '...', subPool: '...' });
+
+// Access a private pool
+const access = await rain.accessPool({ poolId: '...', accessCode: '1234' });
+
+// Verify access code
+await rain.verifyAccessCode({ poolId: '...', accessCode: '1234' }, accessToken);
+
+// Get pools created by a user
+const pools = await rain.getPoolListingByCreator({ limit: 10, offset: 0 }, accessToken);
+
+// Get total participants in a pool
+const count = await rain.getPoolTotalParticipants({ poolId: '...' });
+
+// Get total pools created by user
+const count = await rain.getTotalPoolsCreatedByUser(accessToken);
+
+// Get total predictions by user
+const count = await rain.getTotalPredictionsByUser(accessToken);
+
+// Update streaming status
+await rain.updateStreaming({ poolId: '...', streaming: true }, accessToken);
+
+// Update pool resolution time
+await rain.updatePoolResolutionTime({ poolId: '...', newEndDate: '...' }, accessToken);
+
+// Find pool fallback
+const pool = await rain.findPoolFallback({ poolId: '...' });
+
+// Sign oracles extend time
+await rain.signOraclesExtendTime({ poolId: '...' }, accessToken);
+```
+
+### Investments
+
+```typescript
+// Get user's total investment in a pool
+const investment = await rain.getUserTotalInvestment({ poolId: '...' }, accessToken);
+
+// Get options total volume for a pool
+const volume = await rain.getOptionsTotalVolume({ poolId: '...' });
+
+// Get pool activity (trades)
+const activity = await rain.getPoolActivity({ poolId: '...', limit: 10, offset: 0 });
+
+// Get top holders in a pool
+const holders = await rain.getTopHolders({ poolId: '...', limit: 10, offset: 0 });
+
+// Get user's invested pools
+const pools = await rain.getUserInvestedPools({ limit: 10, offset: 0 }, accessToken);
+
+// Get platform TVL
+const tvl = await rain.getPlatformTvl();
+
+// Get investment volume graph
+const graph = await rain.getInvestmentVolumeGraph({ period: '7d' }, accessToken);
+
+// Calculate user PNL
+const pnl = await rain.calculateUserPnl({ walletAddress: '0x...' }, accessToken);
+
+// Get user total volume
+const volume = await rain.calculateUserTotalVolume(accessToken);
+
+// Get PNL graph
+const graph = await rain.getUserPnlGraph({ period: '30d' }, accessToken);
+
+// Get TVL graph
+const graph = await rain.getTvlGraph();
+
+// Get PNL per pool
+const pnl = await rain.calculateUserPnlPerPool(accessToken);
+
+// Get PNL by specific pool
+const pnl = await rain.getPnlByPoolId({ poolId: '...' }, accessToken);
+
+// Get top winners and losers
+const leaderboard = await rain.getTopWinnersLosers({ limit: 10, period: '7d' });
+
+// Get user overall investment
+const overall = await rain.getUserOverallInvestment(accessToken);
+
+// Get platform volume
+const volume = await rain.getPlatformVolume();
+
+// Get user invested live pools count
+const count = await rain.getUserInvestedLivePoolsCount(accessToken);
+
+// Calculate user open interest
+const oi = await rain.calculateUserOpenInterest(accessToken);
+```
+
+### Orders
+
+```typescript
+// Get user's orders
+const orders = await rain.getUserOrders({ limit: 10, offset: 1, filter: 'pending' }, accessToken);
+
+// Get order book for a pool
+const book = await rain.getOrderBook({ pool: '...' });
+
+// Get user's orders for a specific pool
+const orders = await rain.getUserOrderByPoolId({ poolId: '...' }, accessToken);
+
+// Get all orders for a pool
+const orders = await rain.getOrdersListingByPool({ pool: '...', limit: 10, offset: 1 });
+
+// Get order by ID
+const order = await rain.getOrderById({ orderId: '...' });
+```
+
+### Points
+
+```typescript
+// Get user points
+const points = await rain.getUserPoints(accessToken);
+
+// Get user points graph
+const graph = await rain.getUserPointsGraph(accessToken);
+
+// Add user points
+await rain.addUserPoints({ points: 100, reason: '...' }, accessToken);
+
+// User successful onboarding
+await rain.userSuccessfulOnboarding({ step: '...' }, accessToken);
+```
+
+### Notifications
+
+```typescript
+// Get notifications
+const notifs = await rain.getNotifications({ limit: 20, offset: 0 }, accessToken);
+
+// Mark all as read
+await rain.markAllNotificationsAsRead(accessToken);
+
+// Mark single notification as read
+await rain.markNotificationAsRead({ notificationId: '...' }, accessToken);
+```
+
+### Price Data
+
+```typescript
+// Get price data for a pool
+const prices = await rain.getPriceData({ poolId: '...', interval: '1h' });
+```
+
+### Pool Reviews
+
+```typescript
+// Add review
+await rain.addReview({ poolId: '...', rating: 5, review: 'Great!' }, accessToken);
+
+// Get user's reviews
+const reviews = await rain.getUserReviews(accessToken);
+
+// Get pools by creator with reviews
+const pools = await rain.getPoolsByCreatorReviews(accessToken);
+```
+
+### Follow
+
+```typescript
+// Toggle follow a user
+await rain.toggleFollow({ userId: '...' }, accessToken);
+
+// Check if following
+const status = await rain.checkFollow({ userId: '...' }, accessToken);
+
+// Get followers
+const followers = await rain.getFollowers({ userId: '...', limit: 20, offset: 0 });
+
+// Get following
+const following = await rain.getFollowing({ userId: '...', limit: 20, offset: 0 });
+
+// Get follow stats
+const stats = await rain.getFollowStats({ userId: '...' });
+```
+
+### Rain Burn
+
+```typescript
+// Get total RAIN burned
+const burned = await rain.getTotalBurned();
+
+// Get burn per pool
+const burn = await rain.getBurnPerPool({ poolId: '...' });
+```
+
+### Dispute
+
+```typescript
+// Create dispute message (with optional file upload)
+await rain.createDisputeMessage({
+  pool: '...',
+  role: 'disputer',
+  messageType: 'text',
+  evidence: { description: '...' },
+}, accessToken);
+
+// Get dispute conversation for a sub-pool
+const convo = await rain.getPoolDisputeConvo({ poolId: '...', subPool: '...', limit: 50, offset: 0 }, accessToken);
+```
+
+---
+
+## WebSocket Events (Socket.IO)
+
+Real-time event subscriptions via Socket.IO.
+
+### Setup
+
+```typescript
+import { RainSocket } from 'rain-sdk-v2';
+
+const socket = new RainSocket('https://dev-api.rain.one');
+socket.connect();
+```
+
+### Pool-Scoped Events
+
+Subscribe to events for a specific pool using `poolId`:
+
+```typescript
+// Trading events
+const unsub = socket.onEnterOption(poolId, (data) => {
+  console.log(data.enterOption, data.pool, data.subPool);
+});
+
+socket.onExitOption(poolId, (data) => { /* data.exitOption, pool, subPool */ });
+socket.onLiquidity(poolId, (data) => { /* data.enterLiquidity, pool, subPool */ });
+socket.onSplit(poolId, (data) => { /* data.split, pool, subPool */ });
+socket.onMerge(poolId, (data) => { /* data.merge, pool, subPool */ });
+socket.onRemoveLiquidity(poolId, (data) => { /* data.removeLiquidity, pool, subPool */ });
+
+// Price updates
+socket.onSyncPrice(poolId, (data) => {
+  // data.prices = [{ side: 1, price: 0.62, percentage: 62, subPoolIndex: 1 }, ...]
+  // data.pool, data.subPool
+});
+
+// Order book events
+socket.onOrderCreated(poolId, (data) => { /* data.order, pool, subPool */ });
+socket.onOrderCancelled(poolId, (data) => { /* data.order, pool, subPool */ });
+socket.onOrderFilled(poolId, (data) => { /* data.filledOrder, data.pendingOrder?, pool, subPool */ });
+
+// Pool lifecycle
+socket.onPoolClosed(poolId, (data) => { /* data.pool, data.subPool? */ });
+socket.onPoolReverted(poolId, (data) => { /* data.pool, data.subPool */ });
+socket.onPoolTokenSet(poolId, (data) => { /* data.pool */ });
+socket.onStreamingStatusChanged(poolId, (data) => { /* data.pool */ });
+
+// Resolution events
+socket.onWinner(poolId, (data) => { /* data.pool, data.subPool */ });
+socket.onWinnerProposer(poolId, (data) => { /* data.pool, data.subPool */ });
+socket.onRevealWinnerAvailable(poolId, (data) => { /* data.subPoolId */ });
+
+// Dispute & Appeal events
+socket.onDisputeOpened(poolId, (data) => { /* data.subPool, data.eventType */ });
+socket.onOracleCreated(poolId, (data) => { /* data.pool, data.subPool */ });
+socket.onDisputeTimeExtended(poolId, (data) => { /* data.pool, data.subPool */ });
+socket.onAppealOpened(poolId, (data) => { /* data.pool, data.subPool */ });
+socket.onAppealWinnerCalculated(poolId, (data) => { /* data.subPool */ });
+socket.onDisputeWinner(poolId, (data) => { /* data.subPool, data.eventType */ });
+socket.onAppealWinner(poolId, (data) => { /* data.subPool, data.eventType, data.winnerFinalized */ });
+
+// Claim events (pool-scoped broadcast)
+socket.onClaimReward(poolId, (data) => { /* data.claimReward, pool, subPool */ });
+```
+
+### User-Scoped Events
+
+Events targeted to a specific user (require `userId`):
+
+```typescript
+// Personal claim reward
+socket.onUserClaimReward(poolId, userId, (data) => { /* data.claimReward, pool, subPool */ });
+
+// Dispute bond refunded (disputer won)
+socket.onDisputeRefund(poolId, userId, (data) => { /* data.claimReward, pool, subPool */ });
+
+// Appeal fee refunded (appealer won)
+socket.onAppealRefund(poolId, userId, (data) => { /* data.claimReward, pool, subPool */ });
+
+// Resolution bond refunded (proposer was correct)
+socket.onResolutionRefund(poolId, userId, (data) => { /* data.claimReward, pool, subPool */ });
+
+// Resolver closing share reward
+socket.onResolverReward(poolId, userId, (data) => { /* data.claimReward, pool, subPool */ });
+
+// Personal notifications
+socket.onNotifications(userId, (data) => {
+  // data._id, userId, type, message, pool, subPool, createdAt, read
+});
+```
+
+### Global Events
+
+```typescript
+// New pool created
+socket.onNewPool((data) => { /* data.pool, data.subMarkets */ });
+```
+
+### Generic Subscription
+
+```typescript
+// Subscribe to any channel directly
+const unsub = socket.onChannel('custom-event/123', (data) => { ... });
+
+// Unsubscribe
+unsub();
+```
+
+### Cleanup
+
+```typescript
+socket.disconnect();
+```
+
+### All Socket Event Channels
+
+| Channel | Description |
+|---------|-------------|
+| `pool` | New pool created |
+| `pool-token-set/{poolId}` | Token set for pool |
+| `pool-closed/{poolId}` | Pool/SubPool finalized |
+| `pool-reverted/{poolId}` | Resolution reverted |
+| `streamingStatusChanged/{poolId}` | Streaming toggled |
+| `enter-option/{poolId}` | Shares bought (AMM or order match) |
+| `exit-option/{poolId}` | Shares sold (order match) |
+| `liquidity/{poolId}` | Liquidity added |
+| `split/{poolId}` | Tokens split into Yes+No |
+| `merge/{poolId}` | Yes+No merged back |
+| `remove-liquidity/{poolId}` | Liquidity removed |
+| `sync-price/{poolId}` | Price update |
+| `order-created/{poolId}` | New order placed |
+| `order-cancelled/{poolId}` | Order cancelled |
+| `order-filled/{poolId}` | Order filled (full/partial) |
+| `winner/{poolId}` | Winner proposed |
+| `winner-proposer/{poolId}` | Proposer recorded |
+| `reveal-winner-available/{poolId}` | Appeal winner ready |
+| `dispute-opened/{poolId}` | Dispute opened |
+| `oracle-created/{poolId}` | Dispute oracle deployed |
+| `dispute-time-extented/{poolId}` | Deadline extended |
+| `appeal-opened/{poolId}` | Appeal filed |
+| `appeal-winner-calculated/{poolId}` | Oracle calculated winner |
+| `dispute-winner/{poolId}` | Dispute decided (LEX) |
+| `appeal-winner/{poolId}` | Final appeal winner |
+| `claim-reward/{poolId}` | Reward claimed (broadcast) |
+| `claim-reward/{poolId}/{userId}` | Reward claimed (personal) |
+| `dispute-refund/{poolId}/{userId}` | Dispute bond refunded |
+| `appeal-refund/{poolId}/{userId}` | Appeal fee refunded |
+| `resolution-refund/{poolId}/{userId}` | Resolution bond refunded |
+| `resolver-reward/{poolId}/{userId}` | Resolver reward |
+| `notifications/{userId}` | Personal notifications |
 
 ---
 
