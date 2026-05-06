@@ -30,6 +30,7 @@ export async function uploadMetaData(
         endTime,
         no_of_options,
         creator,
+        tradingModel,
         apiUrl,
     } = params;
 
@@ -38,19 +39,15 @@ export async function uploadMetaData(
 
     const metadata = {
         question: marketQuestion,
-        options: Array.isArray(marketOptions) ? marketOptions : [],
-        tags: marketTags,
         isPrivate: !isPublic,
+        options: Array.isArray(marketOptions) ? marketOptions : [],
         startDate: formattedStartDate,
         endDate: formattedEndDate,
+        tradingModel: tradingModel ?? 0,
+        questionImage: params.questionImage ?? '',
+        tags: marketTags,
         poolDescription: marketDescription,
         isAiResolver: isPublicPoolResolverAi,
-        contractData: {
-            pool_owner: creator,
-            start_time: Number(startTime),
-            end_time: Number(endTime),
-            no_of_options: Number(no_of_options),
-        },
     };
     const res = await fetch(`${apiUrl}/ipfs/upload`, {
         method: "POST",
@@ -61,7 +58,8 @@ export async function uploadMetaData(
         body: JSON.stringify(metadata),
     });
     if (!res.ok) {
-        throw new Error(`Failed to upload metadata: ${res.status}`);
+        const errorText = await res.text().catch(() => res.statusText);
+        throw new Error(`Failed to upload metadata: ${res.status} — ${errorText}`);
     }
     const data = await res.json();
     return data?.data?.ipfsHash;
