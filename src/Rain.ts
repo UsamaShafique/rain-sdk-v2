@@ -333,8 +333,16 @@ export class Rain {
     return poolsApi.getRelatedPools(params, this.cfg(accessToken));
   }
 
-  async getPoolResolutionHistory(params: { poolId: string }, accessToken?: string) {
+  async getPoolResolutionHistory(params: { poolId: string; subPool: string }, accessToken?: string) {
     return poolsApi.getPoolResolutionHistory(params, this.cfg(accessToken));
+  }
+
+  async viewUserProfile(params: { userId: string }, accessToken?: string) {
+    return usersApi.viewUserProfile(params, this.cfg(accessToken));
+  }
+
+  async checkTokenExpiration(accessToken: string) {
+    return usersApi.checkTokenExpiration(this.cfg(accessToken));
   }
 
   async updatePoolResolutionTime(params: UpdatePoolResolutionTimeParams, accessToken: string) {

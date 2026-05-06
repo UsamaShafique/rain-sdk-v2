@@ -183,10 +183,10 @@ export async function getRelatedPools(
 }
 
 export async function getPoolResolutionHistory(
-  params: { poolId: string },
+  params: { poolId: string; subPool: string },
   config: ApiConfig
 ): Promise<ApiResponse> {
-  const res = await fetch(`${config.apiUrl}/pools/get-pool-resolution-history/${encodeURIComponent(params.poolId)}`, {
+  const res = await fetch(`${config.apiUrl}/pools/get-pool-resolution-history/${encodeURIComponent(params.poolId)}/${encodeURIComponent(params.subPool)}`, {
     method: 'GET',
     headers: buildHeaders(config),
   });

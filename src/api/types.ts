@@ -354,6 +354,7 @@ export interface CreateDisputeMessageParams {
 
 export interface GetPoolDisputeConvoParams {
   poolId: string;
+  subPool: string;
   limit?: number;
   offset?: number;
 }

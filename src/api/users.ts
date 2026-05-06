@@ -54,7 +54,26 @@ export async function getUserHistory(
   config: ApiConfig
 ): Promise<ApiResponse<UserHistoryResponse>> {
   const qs = buildQuery({ limit: params.limit, offset: params.offset });
-  const res = await fetch(`${config.apiUrl}/users/history${qs}`, {
+  const res = await fetch(`${config.apiUrl}/users/get-user-history${qs}`, {
+    method: 'GET',
+    headers: buildHeaders(config),
+  });
+  return handleResponse(res);
+}
+
+export async function viewUserProfile(
+  params: { userId: string },
+  config: ApiConfig
+): Promise<ApiResponse> {
+  const res = await fetch(`${config.apiUrl}/users/view-user-profile/${encodeURIComponent(params.userId)}`, {
+    method: 'GET',
+    headers: buildHeaders(config),
+  });
+  return handleResponse(res);
+}
+
+export async function checkTokenExpiration(config: ApiConfig): Promise<ApiResponse> {
+  const res = await fetch(`${config.apiUrl}/users/check-token-expiration`, {
     method: 'GET',
     headers: buildHeaders(config),
   });

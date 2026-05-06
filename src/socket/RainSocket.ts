@@ -28,6 +28,9 @@ export type RainSocketEvent =
   | 'claim-reward'
   | 'dispute-refund'
   | 'appeal-refund'
+  | 'resolution-refund'
+  | 'resolver-reward'
+  | 'notifications'
   | 'pool';
 
 export interface EnterOptionEventData {
@@ -366,5 +369,17 @@ export class RainSocket {
 
   onAppealRefund(poolId: string, userId: string, callback: (data: DisputeRefundEventData) => void): () => void {
     return this.onChannel(`appeal-refund/${poolId}/${userId}`, callback);
+  }
+
+  onResolutionRefund(poolId: string, userId: string, callback: (data: ClaimRewardEventData) => void): () => void {
+    return this.onChannel(`resolution-refund/${poolId}/${userId}`, callback);
+  }
+
+  onResolverReward(poolId: string, userId: string, callback: (data: ClaimRewardEventData) => void): () => void {
+    return this.onChannel(`resolver-reward/${poolId}/${userId}`, callback);
+  }
+
+  onNotifications(userId: string, callback: (data: any) => void): () => void {
+    return this.onChannel(`notifications/${userId}`, callback);
   }
 }

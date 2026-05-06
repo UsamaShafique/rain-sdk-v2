@@ -33,7 +33,7 @@ export async function getPoolDisputeConvo(
   config: ApiConfig
 ): Promise<ApiResponse> {
   const qs = buildQuery({ limit: params.limit, offset: params.offset });
-  const res = await fetch(`${config.apiUrl}/dispute/get-pool-dispute-convo/${encodeURIComponent(params.poolId)}${qs}`, {
+  const res = await fetch(`${config.apiUrl}/dispute/get-pool-dispute-convo/${encodeURIComponent(params.poolId)}/${encodeURIComponent(params.subPool)}${qs}`, {
     method: 'GET',
     headers: buildHeaders(config),
   });
