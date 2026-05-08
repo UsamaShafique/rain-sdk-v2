@@ -4,6 +4,7 @@ export * from './types.js';
 export { TradingModel, OptionSide } from './tx/types.js';
 export type { CreateMarketTxParams, EnterOptionTxParams, AddLiquidityTxParams, RemoveLiquidityTxParams, SplitTxParams, MergeTxParams, ClosePoolAITxParams, ClosePoolManualTxParams, ChooseWinnerTxParams, PlaceBuyOrderTxParams, PlaceSellOrderTxParams, OpenDisputeTxParams, ClaimTxParams, CancelBuyOrdersTxParams, CancelSellOrdersTxParams, RawTransaction, ApproveTxParams } from './tx/types.js';
 export type { LoginParams, LoginResult } from './auth/types.js';
+export { signLoginMessage } from './auth/signMessage.js';
 export * from './api/index.js';
 export { RainSocket } from './socket/RainSocket.js';
 export type { RainSocketEvent, EnterOptionEventData, ExitOptionEventData, LiquidityEventData, SplitEventData, MergeEventData, RemoveLiquidityEventData, SyncPriceEventData, OrderCreatedEventData, OrderCancelledEventData, OrderFilledEventData, PoolClosedEventData, PoolEventData, WinnerEventData, DisputeOpenedEventData, OracleCreatedEventData, AppealOpenedEventData, DisputeWinnerEventData, AppealWinnerEventData, ClaimRewardEventData, DisputeRefundEventData } from './socket/RainSocket.js';
