@@ -246,7 +246,8 @@ export interface PnlByPoolIdParams {
 // ─── Price Data ───────────────────────────────────────────────────────────────
 
 export interface PriceDataParams {
-  contractAddress: string;
+  subPool: string;
+  side: 1 | 2; // 1 = YES, 2 = NO
   filter?: '1H' | '6H' | '1D' | '1W' | '1M' | 'ALL';
 }
 
