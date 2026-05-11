@@ -26,8 +26,8 @@ export function validateCreateMarketParams(params: CreateMarketTxParams) {
     if (!creator) throw new Error("creator address is required");
     if (!marketQuestion) throw new Error("question is required");
     if (!marketDescription) throw new Error("description is required");
-    if (!Array.isArray(marketOptions) || marketOptions.length < 3 || marketOptions.length > 26) {
-        throw new Error("options must be between 3 and 26");
+    if (!Array.isArray(marketOptions) || marketOptions.length < 2 || marketOptions.length > 26) {
+        throw new Error("options must be between 2 and 26");
     }
     if (marketOptions.some(opt => !opt?.toString().trim())) {
         throw new Error("options cannot contain empty values");
@@ -49,8 +49,10 @@ export function validateCreateMarketParams(params: CreateMarketTxParams) {
     if (!factoryContractAddress) throw new Error("factoryContractAddress is required");
     const decimals = tokenDecimals ?? 6;
     const oneTokenInWei = 10n ** BigInt(decimals);
-    if (inputAmountWei < oneTokenInWei * 10n) {
-        throw new Error("Market cannot be opened: inputAmountWei must be at least $10");
+    // $0.1 minimum for dev/stage, validation for production handled separately
+    const minAmount = oneTokenInWei / 10n; // 0.1 token
+    if (inputAmountWei < minAmount) {
+        throw new Error("Market cannot be opened: inputAmountWei must be at least $0.1");
     }
     if (startTime >= endTime) throw new Error("startTime must be earlier than endTime");
 

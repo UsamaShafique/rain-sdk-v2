@@ -23,14 +23,21 @@ import { arbitrum } from 'viem/chains';
 
 // Initialize SDK
 const rain = new Rain({
-  environment: 'development', // 'development' | 'stage' | 'production'
+  environment: 'development', // 'development' | 'stage'
   rpcUrl: 'https://arb1.arbitrum.io/rpc', // optional, uses random public RPC if omitted
 });
 
 // Get environment config
 const config = rain.getEnvironmentConfig();
-console.log(config.usdt_token); // USDT contract address
 console.log(config.market_factory_address); // Factory contract
+console.log(config.tokens.usdt.address);    // USDT token address
+console.log(config.tokens.rain.address);    // RAIN token address
+console.log(config.tokens.usdt.decimals);   // 6
+console.log(config.tokens.rain.decimals);   // 18
+
+// Get token config by address
+const tokenInfo = rain.getTokenConfig('0x...');
+console.log(tokenInfo?.decimals, tokenInfo?.symbol);
 ```
 
 ---
@@ -49,7 +56,7 @@ const rain = new Rain(config?: RainCoreConfig);
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `environment` | `'development' \| 'stage' \| 'production'` | `'development'` | Target environment |
+| `environment` | `'development' \| 'stage'` | `'development'` | Target environment |
 | `rpcUrl` | `string` | Random public RPC | Custom Arbitrum RPC URL |
 | `apiUrl` | `string` | From environment | Custom API URL |
 
@@ -130,9 +137,12 @@ interface RawTransaction {
 Creates a new prediction market. Returns approval TX (if needed) + createPool TX.
 
 ```typescript
+const config = rain.getEnvironmentConfig();
+
+// Create market with USDT (6 decimals)
 const txs = await rain.buildCreateMarketTx({
   marketQuestion: 'Will ETH reach $5000 by end of 2025?',
-  marketOptions: ['Yes', 'No', 'Maybe'],
+  marketOptions: ['Yes', 'No'],
   marketTags: ['crypto'],
   marketDescription: 'Prediction on ETH price target',
   isPublic: true,
@@ -140,21 +150,29 @@ const txs = await rain.buildCreateMarketTx({
   creator: '0x...', // smart account or EOA address
   startTime: BigInt(Math.floor(Date.now() / 1000) + 120), // 2 min from now
   endTime: BigInt(Math.floor(Date.now() / 1000) + 86400), // 24h from now
-  no_of_options: 3n,
+  no_of_options: 2n,
   disputeTimer: 60, // seconds (set by SDK from environment)
-  inputAmountWei: parseUnits('10', 6), // 10 USDT initial liquidity
-  barValues: [33.33, 33.33, 33.34], // probability distribution (0-100, sums to 100)
-  baseToken: config.usdt_token, // USDT address
+  inputAmountWei: parseUnits('10', 6), // 10 USDT
+  barValues: [50, 50], // probability distribution (0-100, sums to 100)
+  baseToken: config.tokens.usdt.address, // USDT
   tradingModel: TradingModel.AMM, // AMM = 0, OrderBook = 1
 });
 
+// Create market with RAIN token (18 decimals)
+const txsRain = await rain.buildCreateMarketTx({
+  ...params,
+  inputAmountWei: parseUnits('10', 18), // 10 RAIN
+  baseToken: config.tokens.rain.address, // RAIN token
+});
+
 // Approval amount = liquidity + (oracleFixedFeePerOption * numberOfOptions)
+// Oracle fee is automatically calculated based on the token's decimals
 ```
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `marketQuestion` | `string` | The market question |
-| `marketOptions` | `string[]` | Option labels (3-26 options) |
+| `marketOptions` | `string[]` | Option labels (2-26 options) |
 | `marketTags` | `string[]` | Tags (1-3) |
 | `marketDescription` | `string` | Description |
 | `isPublic` | `boolean` | Public market |
@@ -408,7 +426,7 @@ Build an ERC20 approve transaction.
 
 ```typescript
 const tx = rain.buildApprovalTx({
-  tokenAddress: config.usdt_token,
+  tokenAddress: config.tokens.usdt.address,
   spender: '0x...', // market contract address
   amount: parseUnits('100', 6), // 100 USDT
 });
@@ -424,7 +442,7 @@ Check current ERC20 allowance.
 
 ```typescript
 const allowance = await rain.getTokenAllowance({
-  tokenAddress: config.usdt_token,
+  tokenAddress: config.tokens.usdt.address,
   owner: '0x...', // your address
   spender: '0x...', // market contract
 });
@@ -534,9 +552,22 @@ const result = await rain.checkOrderExists({
 
 Wallet-based login to the Rain backend.
 
+#### `signLoginMessage(walletClient, walletAddress)`
+
+Signs the lowercased wallet address using `personal_sign`. This signature is required for login.
+
+```typescript
+import { signLoginMessage } from 'rain-sdk-v2';
+
+const walletClient = createWalletClient({ chain: arbitrum, transport: custom(window.ethereum) });
+const signature = await signLoginMessage(walletClient, '0x...' as `0x${string}`);
+```
+
+#### `login(params)`
+
 ```typescript
 const result = await rain.login({
-  signature: '0x...', // personal_sign of lowercased wallet address
+  signature, // from signLoginMessage
   walletAddress: '0x...', // EOA address
   smartWalletAddress: '0x...', // Smart account address
   referredBy: 'CODE', // optional referral code
@@ -564,10 +595,17 @@ Returns:
 | `apiUrl` | Backend API URL |
 | `market_factory_address` | Factory contract address |
 | `dispute_initial_timer` | Dispute timer in seconds |
-| `oracle_fixed_fee_per_option` | Oracle fee per option in base token wei |
-| `usdt_symbol` | USDT token symbol |
-| `usdt_token` | USDT token address |
-| `rain_token` | RAIN token address |
+| `tokens.usdt` | USDT token config (`address`, `symbol`, `decimals`, `oracle_fixed_fee_per_option`) |
+| `tokens.rain` | RAIN token config (`address`, `symbol`, `decimals`, `oracle_fixed_fee_per_option`) |
+
+### `getTokenConfig(tokenAddress)`
+
+Looks up token configuration by contract address. Returns `TokenConfig` or `null`.
+
+```typescript
+const tokenInfo = rain.getTokenConfig('0x...');
+// { address, symbol, decimals, oracle_fixed_fee_per_option }
+```
 
 ---
 
@@ -595,11 +633,28 @@ enum OptionSide {
 
 ## Environments
 
-| Environment | API | Factory |
-|-------------|-----|---------|
-| `development` | `https://dev-api.rain.one` | `0xBD99...0adE` |
-| `stage` | `https://stg-api.rain.one` | `0xD490...96BE` |
-| `production` | `https://prod-api.rain.one` | `0xA864...F264` |
+| Environment | API | Factory | USDT | RAIN |
+|-------------|-----|---------|------|------|
+| `development` | `https://dev2-api.rain.one` | `0xBD99...0adE` | 6 decimals | 18 decimals |
+| `stage` | `https://stg2-api.rain.one` | `0x4b93...2884` | 6 decimals | 18 decimals |
+
+### Supported Tokens
+
+Each environment includes token configs for both **USDT** (6 decimals) and **RAIN** (18 decimals). The SDK automatically handles decimal conversions for oracle fees and minimum liquidity validation based on the token used.
+
+```typescript
+const config = rain.getEnvironmentConfig();
+
+// USDT
+config.tokens.usdt.address   // Token contract address
+config.tokens.usdt.decimals  // 6
+config.tokens.usdt.symbol    // "USDTm" (dev) or "USD₮0" (stage)
+
+// RAIN
+config.tokens.rain.address   // Token contract address
+config.tokens.rain.decimals  // 18
+config.tokens.rain.symbol    // "RAIN"
+```
 
 ---
 

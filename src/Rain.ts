@@ -43,7 +43,6 @@ export class Rain {
   private readonly marketFactory: `0x${string}`;
   private readonly apiUrl: string;
   private readonly distute_initial_timer: number;
-  private readonly oracleFixedFeePerOption: bigint;
   private readonly rpcUrl?: string;
 
   constructor(config: RainCoreConfig = {}) {
@@ -64,7 +63,20 @@ export class Rain {
     this.marketFactory = envConfig.market_factory_address
     this.apiUrl = apiUrl ?? envConfig.apiUrl;
     this.distute_initial_timer = envConfig.dispute_initial_timer;
-    this.oracleFixedFeePerOption = envConfig.oracle_fixed_fee_per_option;
+  }
+
+  /**
+   * Get token config by address. Returns decimals, symbol, and oracle fee.
+   */
+  getTokenConfig(tokenAddress: `0x${string}`) {
+    const envConfig = ENV_CONFIG[this.environment];
+    const tokens = envConfig.tokens;
+    for (const key of Object.keys(tokens) as Array<keyof typeof tokens>) {
+      if (tokens[key].address.toLowerCase() === tokenAddress.toLowerCase()) {
+        return tokens[key];
+      }
+    }
+    return null;
   }
 
   buildApprovalTx(params: ApproveTxParams): RawTransaction {
@@ -72,7 +84,10 @@ export class Rain {
   }
 
   buildCreateMarketTx(params: CreateMarketTxParams): Promise<RawTransaction[]> {
-    return buildCreateMarketRawTx({ ...params, factoryContractAddress: this.marketFactory, apiUrl: this.apiUrl, rpcUrl: this.rpcUrl, disputeTimer: this.distute_initial_timer, oracleFixedFeePerOption: this.oracleFixedFeePerOption });
+    const tokenConfig = this.getTokenConfig(params.baseToken);
+    const oracleFixedFeePerOption = tokenConfig?.oracle_fixed_fee_per_option ?? 1_000_000n;
+    const tokenDecimals = params.tokenDecimals ?? tokenConfig?.decimals ?? 6;
+    return buildCreateMarketRawTx({ ...params, tokenDecimals, factoryContractAddress: this.marketFactory, apiUrl: this.apiUrl, rpcUrl: this.rpcUrl, disputeTimer: this.distute_initial_timer, oracleFixedFeePerOption });
   }
 
   buildEnterOptionTx(params: EnterOptionTxParams): RawTransaction {
