@@ -912,7 +912,11 @@ await rain.markNotificationAsRead({ notificationId: '...' }, accessToken);
 
 ```typescript
 // Get price data for a pool
-const prices = await rain.getPriceData({ poolId: '...', interval: '1h' });
+const prices = await rain.getPriceData({
+  contractAddress: '0x...', // market contract address
+  side: 1, // 1 = YES, 2 = NO
+  filter: '1D', // '1H' | '6H' | '1D' | '1W' | '1M' | 'ALL'
+});
 ```
 
 ### Pool Reviews
