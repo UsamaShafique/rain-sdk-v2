@@ -126,7 +126,7 @@ export interface CreateMarketTxParams {
     barValues: number[]; // transformedBarValues
     baseToken: `0x${string}`; // TOKEN contract address
     tradingModel?: TradingModel;
-    questionImage?: string;
+    marketImage: string;
     tokenDecimals?: number;
     factoryContractAddress?: `0x${string}`;
     oracleFixedFeePerOption?: bigint;

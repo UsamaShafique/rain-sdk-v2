@@ -44,7 +44,7 @@ export async function uploadMetaData(
         startDate: formattedStartDate,
         endDate: formattedEndDate,
         tradingModel: tradingModel ?? 0,
-        questionImage: params.questionImage ?? '',
+        questionImage: params.marketImage,
         tags: marketTags,
         poolDescription: marketDescription,
         isAiResolver: isPublicPoolResolverAi,

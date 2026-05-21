@@ -156,6 +156,7 @@ const txs = await rain.buildCreateMarketTx({
   barValues: [50, 50], // probability distribution (0-100, sums to 100)
   baseToken: config.tokens.usdt.address, // USDT
   tradingModel: TradingModel.AMM, // AMM = 0, OrderBook = 1
+  marketImage: 'https://cdn.example.com/market-image.png',
 });
 
 // Create market with RAIN token (18 decimals)
@@ -183,8 +184,9 @@ const txsRain = await rain.buildCreateMarketTx({
 | `no_of_options` | `bigint` | Number of options |
 | `inputAmountWei` | `bigint` | Initial liquidity in base token wei |
 | `barValues` | `number[]` | Probability distribution (0-100 scale) |
-| `baseToken` | `0x${string}` | Base token address (USDT) |
+| `baseToken` | `0x${string}` | Base token address (USDT or RAIN) |
 | `tradingModel` | `TradingModel` | `AMM (0)` or `OrderBook (1)` |
+| `marketImage` | `string` | Market image URL (required) |
 
 ---
 

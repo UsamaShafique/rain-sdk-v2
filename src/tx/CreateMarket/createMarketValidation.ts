@@ -46,6 +46,7 @@ export function validateCreateMarketParams(params: CreateMarketTxParams) {
     if (!barValues || !Array.isArray(barValues) || barValues.length === 0)
         throw new Error("barValues array is required and cannot be empty");
     if (!baseToken) throw new Error("baseToken address is required");
+    if (!params.marketImage) throw new Error("marketImage is required");
     if (!factoryContractAddress) throw new Error("factoryContractAddress is required");
     const decimals = tokenDecimals ?? 6;
     const oneTokenInWei = 10n ** BigInt(decimals);
