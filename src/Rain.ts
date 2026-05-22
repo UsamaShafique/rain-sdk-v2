@@ -90,12 +90,12 @@ export class Rain {
     return buildCreateMarketRawTx({ ...params, tokenDecimals, factoryContractAddress: this.marketFactory, apiUrl: this.apiUrl, rpcUrl: this.rpcUrl, disputeTimer: this.distute_initial_timer, oracleFixedFeePerOption });
   }
 
-  buildEnterOptionTx(params: EnterOptionTxParams): RawTransaction {
-    return buildEnterOptionRawTx(params);
+  async buildEnterOptionTx(params: EnterOptionTxParams & { walletAddress: `0x${string}` }): Promise<RawTransaction[]> {
+    return buildEnterOptionRawTx({ ...params, rpcUrl: this.rpcUrl! });
   }
 
-  buildAddLiquidityTx(params: AddLiquidityTxParams): RawTransaction {
-    return buildAddLiquidityRawTx(params);
+  async buildAddLiquidityTx(params: AddLiquidityTxParams & { walletAddress: `0x${string}` }): Promise<RawTransaction[]> {
+    return buildAddLiquidityRawTx({ ...params, rpcUrl: this.rpcUrl! });
   }
 
   buildRemoveLiquidityTx(params: RemoveLiquidityTxParams): RawTransaction {
@@ -119,8 +119,8 @@ export class Rain {
     return getUserOptionShares({ ...params, rpcUrl: this.rpcUrl! });
   }
 
-  buildSplitTx(params: SplitTxParams): RawTransaction {
-    return buildSplitRawTx(params);
+  async buildSplitTx(params: SplitTxParams & { walletAddress: `0x${string}` }): Promise<RawTransaction[]> {
+    return buildSplitRawTx({ ...params, rpcUrl: this.rpcUrl! });
   }
 
   buildMergeTx(params: MergeTxParams): RawTransaction {
@@ -139,8 +139,8 @@ export class Rain {
     return buildChooseWinnerRawTx(params);
   }
 
-  buildPlaceBuyOrderTx(params: PlaceBuyOrderTxParams): RawTransaction {
-    return buildPlaceBuyOrderRawTx(params);
+  async buildPlaceBuyOrderTx(params: PlaceBuyOrderTxParams & { walletAddress: `0x${string}` }): Promise<RawTransaction[]> {
+    return buildPlaceBuyOrderRawTx({ ...params, rpcUrl: this.rpcUrl! });
   }
 
   buildPlaceSellOrderTx(params: PlaceSellOrderTxParams): RawTransaction {

@@ -192,17 +192,19 @@ const txsRain = await rain.buildCreateMarketTx({
 
 ### Trading
 
-#### `buildEnterOptionTx(params: EnterOptionTxParams): RawTransaction`
+#### `buildEnterOptionTx(params): Promise<RawTransaction[]>`
 
-Buy shares of an option (AMM trade).
+Buy shares of an option (AMM trade). Automatically reads the market's base token, checks allowance, and includes approval TX if needed.
 
 ```typescript
-const tx = rain.buildEnterOptionTx({
+const txs = await rain.buildEnterOptionTx({
   marketContractAddress: '0x...',
   selectedOption: 1n, // 1-based option index
   optionSide: OptionSide.Yes, // Yes = 1, No = 2
-  buyAmountInWei: parseUnits('5', 6), // 5 USDT
+  buyAmountInWei: parseUnits('5', 6), // 5 USDT (or parseUnits('5', 18) for RAIN)
+  walletAddress: '0x...', // user's wallet address
 });
+// Returns [approveTx?, enterOptionTx]
 ```
 
 | Parameter | Type | Description |
@@ -211,26 +213,29 @@ const tx = rain.buildEnterOptionTx({
 | `selectedOption` | `bigint` | Option index (1-based) |
 | `optionSide` | `OptionSide` | `Yes (1)` or `No (2)` |
 | `buyAmountInWei` | `bigint` | Amount in base token wei |
+| `walletAddress` | `0x${string}` | User's wallet address (for allowance check) |
 
-> **Note:** Requires prior ERC20 approval to the market contract.
+> **Note:** Approval is handled automatically. The SDK reads `baseToken` from the market contract and checks allowance before building transactions.
 
 ---
 
 ### Split & Merge
 
-#### `buildSplitTx(params: SplitTxParams): RawTransaction`
+#### `buildSplitTx(params): Promise<RawTransaction[]>`
 
-Split base tokens into equal Yes + No shares for an option.
+Split base tokens into equal Yes + No shares for an option. Automatically checks allowance and includes approval TX if needed.
 
 ```typescript
-const tx = rain.buildSplitTx({
+const txs = await rain.buildSplitTx({
   marketContractAddress: '0x...',
   option: 1n,
   amount: parseUnits('5', 6), // 5 USDT -> 5 Yes shares + 5 No shares
+  walletAddress: '0x...', // user's wallet address
 });
+// Returns [approveTx?, splitTx]
 ```
 
-> **Note:** Requires prior ERC20 approval to the market contract.
+> **Note:** Approval is handled automatically.
 
 #### `buildMergeTx(params: MergeTxParams): RawTransaction`
 
@@ -250,19 +255,21 @@ const tx = rain.buildMergeTx({
 
 ### Liquidity
 
-#### `buildAddLiquidityTx(params: AddLiquidityTxParams): RawTransaction`
+#### `buildAddLiquidityTx(params): Promise<RawTransaction[]>`
 
-Add liquidity to a specific option.
+Add liquidity to a specific option. Automatically checks allowance and includes approval TX if needed.
 
 ```typescript
-const tx = rain.buildAddLiquidityTx({
+const txs = await rain.buildAddLiquidityTx({
   marketContractAddress: '0x...',
   option: 1n,
   totalAmountInWei: parseUnits('10', 6), // 10 USDT
+  walletAddress: '0x...', // user's wallet address
 });
+// Returns [approveTx?, addLiquidityTx]
 ```
 
-> **Note:** Requires prior ERC20 approval to the market contract.
+> **Note:** Approval is handled automatically.
 
 #### `buildRemoveLiquidityTx(params: RemoveLiquidityTxParams): RawTransaction`
 
@@ -286,21 +293,23 @@ const tx = rain.buildRemoveLiquidityTx({
 
 ### Order Book
 
-#### `buildPlaceBuyOrderTx(params: PlaceBuyOrderTxParams): RawTransaction`
+#### `buildPlaceBuyOrderTx(params): Promise<RawTransaction[]>`
 
-Place a limit buy order.
+Place a limit buy order. Automatically checks allowance and includes approval TX if needed.
 
 ```typescript
-const tx = rain.buildPlaceBuyOrderTx({
+const txs = await rain.buildPlaceBuyOrderTx({
   marketContractAddress: '0x...',
   option: 1n,
   optionSide: OptionSide.Yes,
   price: parseEther('0.5'), // 50% price in 1e18 scale
   amount: parseUnits('10', 6), // 10 USDT
+  walletAddress: '0x...', // user's wallet address
 });
+// Returns [approveTx?, placeBuyOrderTx]
 ```
 
-> **Note:** Requires prior ERC20 approval to the market contract. Available when AMM pool is closed.
+> **Note:** Approval is handled automatically. Available when AMM pool is closed.
 
 #### `buildPlaceSellOrderTx(params: PlaceSellOrderTxParams): RawTransaction`
 

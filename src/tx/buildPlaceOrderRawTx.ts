@@ -2,9 +2,13 @@ import { encodeFunctionData } from "viem";
 import { MarketsAbi } from "../abi/MarketsAbi.js";
 import { PlaceBuyOrderTxParams, PlaceSellOrderTxParams, RawTransaction } from "./types.js";
 import { PLACE_BUY_ORDER, PLACE_SELL_ORDER } from "../constants/contractmethods.js";
+import { checkMarketTokenAllowance } from "../utils/helpers.js";
+import { buildApproveRawTx } from "./buildApprovalRawTx.js";
 
-export function buildPlaceBuyOrderRawTx(params: PlaceBuyOrderTxParams): RawTransaction {
-    const { marketContractAddress, option, optionSide, price, amount } = params;
+export async function buildPlaceBuyOrderRawTx(
+    params: PlaceBuyOrderTxParams & { walletAddress: `0x${string}`; rpcUrl: string }
+): Promise<RawTransaction[]> {
+    const { marketContractAddress, option, optionSide, price, amount, walletAddress, rpcUrl } = params;
 
     if (!marketContractAddress) throw new Error("marketContractAddress is required");
     if (option === undefined || option === null) throw new Error("option is required");
@@ -12,7 +16,15 @@ export function buildPlaceBuyOrderRawTx(params: PlaceBuyOrderTxParams): RawTrans
     if (!price || price <= 0n) throw new Error("price must be greater than 0");
     if (!amount || amount <= 0n) throw new Error("amount must be greater than 0");
 
-    return {
+    const { allowance, baseToken } = await checkMarketTokenAllowance({ marketContractAddress, owner: walletAddress, rpcUrl });
+
+    const txs: RawTransaction[] = [];
+
+    if (allowance < amount) {
+        txs.push(buildApproveRawTx({ tokenAddress: baseToken, spender: marketContractAddress, amount }));
+    }
+
+    txs.push({
         to: marketContractAddress,
         data: encodeFunctionData({
             abi: MarketsAbi,
@@ -20,7 +32,9 @@ export function buildPlaceBuyOrderRawTx(params: PlaceBuyOrderTxParams): RawTrans
             args: [option, optionSide, price, amount],
         }),
         value: 0n,
-    };
+    });
+
+    return txs;
 }
 
 export function buildPlaceSellOrderRawTx(params: PlaceSellOrderTxParams): RawTransaction {
