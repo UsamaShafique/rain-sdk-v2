@@ -973,12 +973,34 @@ const burn = await rain.getBurnPerPool({ poolId: '...' });
 ### Dispute
 
 ```typescript
-// Create dispute message (with optional file upload)
+// Create dispute message (text)
+await rain.createDisputeMessage({
+  pool: '...',          // Parent pool document ID
+  subPool: '...',       // SubPool document ID
+  role: 'disputer',     // 'creator' | 'disputer' | 'proposer'
+  messageType: 'text',  // 'text' | 'image' | 'video' | 'file' | 'youtube' | 'mixed'
+  evidence: {
+    options: ['Yes', 'No'],                // required, at least 2
+    evidenceType: 'photo',                 // 'photo' | 'video' | 'pdf' | 'youtube' | 'mixed'
+    question: 'Did the event happen?',     // optional
+    description: 'Screenshot of result',   // optional
+    source: 'https://espn.com/result',     // optional
+    youtubeUrls: ['https://youtube.com/watch?v=abc123'], // optional
+    urls: ['https://example.com/proof'],   // optional
+  },
+}, accessToken);
+
+// Create dispute message with file attachments (image/video/pdf)
 await rain.createDisputeMessage({
   pool: '...',
-  role: 'disputer',
-  messageType: 'text',
-  evidence: { description: '...' },
+  subPool: '...',
+  role: 'creator',
+  messageType: 'image',     // set to 'file' for PDF
+  files: [fileObject],      // File[] — required for image/video/file/mixed types, max 25MB each
+  evidence: {
+    options: ['Yes', 'No'],
+    evidenceType: 'photo',  // use 'pdf' for PDF files
+  },
 }, accessToken);
 
 // Get dispute conversation for a sub-pool

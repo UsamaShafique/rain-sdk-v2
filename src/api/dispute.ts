@@ -7,16 +7,22 @@ export async function createDisputeMessage(
 ): Promise<ApiResponse> {
   const formData = new FormData();
   formData.append('pool', params.pool);
+  formData.append('subPool', params.subPool);
   formData.append('role', params.role);
   formData.append('messageType', params.messageType);
   formData.append('evidence', JSON.stringify(params.evidence));
-  if (params.file) {
-    formData.append('file', params.file);
+  if (params.files && params.files.length > 0) {
+    for (const file of params.files) {
+      formData.append('files', file);
+    }
   }
 
   const headers: Record<string, string> = {};
   if (config.accessToken) {
     headers['Authorization'] = `Bearer ${config.accessToken}`;
+  }
+  if (config.apiUrl?.includes('ngrok')) {
+    headers['ngrok-skip-browser-warning'] = 'true';
   }
   // Do not set Content-Type for FormData; the browser sets the boundary automatically.
 

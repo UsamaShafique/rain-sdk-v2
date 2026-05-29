@@ -340,16 +340,18 @@ export interface MarkNotificationAsReadParams {
 
 export interface CreateDisputeMessageParams {
   pool: string;
-  role: 'creator' | 'disputer';
-  messageType: 'text' | 'image' | 'video' | 'file' | 'youtube';
-  file?: Blob | File;
+  subPool: string;
+  role: 'creator' | 'disputer' | 'proposer';
+  messageType: 'text' | 'image' | 'video' | 'file' | 'youtube' | 'mixed';
+  files?: (Blob | File)[];
   evidence: {
-    question: string;
+    question?: string;
     options: string[];
-    evidenceType: 'photo' | 'video' | 'pdf' | 'youtube';
+    evidenceType: 'photo' | 'video' | 'pdf' | 'youtube' | 'mixed';
     description?: string;
     source?: string;
-    youtubeUrl?: string;
+    youtubeUrls?: string[];
+    urls?: string[];
   };
 }
 
