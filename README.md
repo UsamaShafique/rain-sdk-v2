@@ -484,6 +484,19 @@ const yesShares = await rain.getUserOptionShares({
 });
 ```
 
+### `getDynamicPayout(params): Promise<bigint[]>`
+
+Get the dynamic payout amounts for a user on a specific option. Returns an array of payout values per side.
+
+```typescript
+const payouts = await rain.getDynamicPayout({
+  marketContractAddress: '0x...',
+  userAddress: '0x...',
+  option: 1n, // 1-based option index
+});
+// payouts = [yesPayoutWei, noPayoutWei]
+```
+
 ### `getUserActiveBuyOrders(params): Promise<bigint>`
 
 Get count of user's active buy orders.
