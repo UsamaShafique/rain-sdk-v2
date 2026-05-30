@@ -23,7 +23,7 @@ export interface TokenConfig {
 export const ENV_CONFIG = {
     development: {
         apiUrl: "https://dev2-api.rain.one",
-        market_factory_address: "0xBD99441C4116b85dFecA2d6521EC0e2Eb62F0adE" as `0x${string}`,
+        market_factory_address: "0x0A35D88482dC2F3B1FBa65755EF3A4ef1AB15961" as `0x${string}`,
         dispute_initial_timer: 1 * 60,
         tokens: {
             usdt: {
