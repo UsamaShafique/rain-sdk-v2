@@ -37,6 +37,12 @@ import * as disputeApi from './api/dispute.js';
 import * as followApi from './api/follow.js';
 
 const erc20AllowanceAbi = parseAbi(['function allowance(address owner, address spender) view returns (uint256)']);
+const factoryViewAbi = parseAbi([
+  'function oracleFixedFee() view returns (uint256)',
+  'function liquidityFee() view returns (uint256)',
+  'function baseToken() view returns (address)',
+]);
+const erc20DecimalsAbi = parseAbi(['function decimals() view returns (uint8)']);
 
 export class Rain {
 
@@ -84,11 +90,30 @@ export class Rain {
     return buildApproveRawTx(params);
   }
 
-  buildCreateMarketTx(params: CreateMarketTxParams): Promise<RawTransaction[]> {
+  async getCreateMarketFees(tokenAddress: `0x${string}`): Promise<{ oracleFeePerOption: bigint; liquidityFeeBps: bigint }> {
+    const pc = createPublicClient({ chain: arbitrum, transport: http(this.rpcUrl) });
+    const [oracleFeeRaw, liquidityFeeBps, factoryBaseToken] = await Promise.all([
+      pc.readContract({ address: this.marketFactory, abi: factoryViewAbi, functionName: 'oracleFixedFee' }),
+      pc.readContract({ address: this.marketFactory, abi: factoryViewAbi, functionName: 'liquidityFee' }),
+      pc.readContract({ address: this.marketFactory, abi: factoryViewAbi, functionName: 'baseToken' }),
+    ]);
+    if (tokenAddress.toLowerCase() === (factoryBaseToken as string).toLowerCase()) {
+      return { oracleFeePerOption: oracleFeeRaw as bigint, liquidityFeeBps: liquidityFeeBps as bigint };
+    }
+    const baseTokenDecimals = await pc.readContract({ address: factoryBaseToken as `0x${string}`, abi: erc20DecimalsAbi, functionName: 'decimals' });
+    const tokenConfig = this.getTokenConfig(tokenAddress);
+    const tokenDecimals = BigInt(tokenConfig?.decimals ?? 18);
+    const oracleFeePerOption = (oracleFeeRaw as bigint) * (10n ** (tokenDecimals - BigInt(baseTokenDecimals)));
+    return { oracleFeePerOption, liquidityFeeBps: liquidityFeeBps as bigint };
+  }
+
+  async buildCreateMarketTx(params: CreateMarketTxParams): Promise<RawTransaction[]> {
     const tokenConfig = this.getTokenConfig(params.baseToken);
-    const oracleFixedFeePerOption = tokenConfig?.oracle_fixed_fee_per_option ?? 1_000_000n;
     const tokenDecimals = params.tokenDecimals ?? tokenConfig?.decimals ?? 6;
-    return buildCreateMarketRawTx({ ...params, tokenDecimals, factoryContractAddress: this.marketFactory, apiUrl: this.apiUrl, rpcUrl: this.rpcUrl, disputeTimer: this.distute_initial_timer, oracleFixedFeePerOption });
+    const { oracleFeePerOption, liquidityFeeBps } = await this.getCreateMarketFees(params.baseToken);
+    const liquidityFeeAmount = params.inputAmountWei * liquidityFeeBps / 10000n;
+    const totalOracleFee = oracleFeePerOption * BigInt(params.no_of_options) + liquidityFeeAmount;
+    return buildCreateMarketRawTx({ ...params, tokenDecimals, factoryContractAddress: this.marketFactory, apiUrl: this.apiUrl, rpcUrl: this.rpcUrl, disputeTimer: this.distute_initial_timer, oracleFixedFeePerOption: totalOracleFee / BigInt(params.no_of_options) + 1n });
   }
 
   async buildEnterOptionTx(params: EnterOptionTxParams & { walletAddress: `0x${string}` }): Promise<RawTransaction[]> {
