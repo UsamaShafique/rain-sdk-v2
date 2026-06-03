@@ -33,7 +33,7 @@ export const ENV_CONFIG = {
                 oracle_fixed_fee_per_option: 1_000_000n, // $1 in 6 decimals
             } as TokenConfig,
             rain: {
-                address: "0x25118290e6A5f4139381D072181157035864099d" as `0x${string}`,
+                address: "0x43976a124e6834b541840Ce741243dAD3dd538DA" as `0x${string}`,
                 symbol: "RAIN",
                 decimals: 18,
                 oracle_fixed_fee_per_option: 1_000_000_000_000_000_000n, // $1 in 18 decimals
@@ -53,7 +53,7 @@ export const ENV_CONFIG = {
                 oracle_fixed_fee_per_option: 1_000_000n,
             } as TokenConfig,
             rain: {
-                address: "0x43976a124e6834b541840Ce741243dAD3dd538DA" as `0x${string}`,
+                address: "0x25118290e6A5f4139381D072181157035864099d" as `0x${string}`,
                 symbol: "RAIN",
                 decimals: 18,
                 oracle_fixed_fee_per_option: 1_000_000_000_000_000_000n,
