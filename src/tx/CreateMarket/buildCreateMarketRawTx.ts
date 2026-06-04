@@ -43,8 +43,8 @@ export async function buildCreateMarketRawTx(
     const liquidityPercentages = normalizeBarValue.map((v) => BigInt(v));
     const ipfsUrl = await uploadMetaData(params);
 
-    // oracleEndTime = endTime + disputeTimer (seconds)
-    const oracleEndTime = BigInt(endTime) + BigInt(disputeTimer);
+    // oracleEndTime is a duration (not absolute), default 3 days
+    const oracleEndTime = BigInt(disputeTimer);
 
     const createMarketParams = {
         isPublic,
@@ -58,7 +58,7 @@ export async function buildCreateMarketRawTx(
         ipfsUri: ipfsUrl,
         initialLiquidity: inputAmountWei,
         liquidityPercentages,
-        poolResolver: ZERO_ADDRESS as `0x${string}`,
+        initialYesPrices: params.initialYesPrices ?? liquidityPercentages.map(() => 500000000000000000n),
         baseToken,
         tradingModel: tradingModel ?? 0,
     };

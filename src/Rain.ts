@@ -20,6 +20,8 @@ import { LoginParams, LoginResult } from './auth/types.js';
 import { getUserOptionLPShares } from './markets/getUserOptionLPShares.js';
 import { getUserOptionShares } from './markets/getUserOptionShares.js';
 import { getDynamicPayout } from './markets/getDynamicPayout.js';
+import { getUserSharesInEscrow } from './markets/getUserSharesInEscrow.js';
+import { getOptionClaimed } from './markets/getOptionClaimed.js';
 import { createPublicClient, http, parseAbi } from 'viem';
 import { arbitrum } from 'viem/chains';
 import type { ApiConfig, UserProfileUpdateParams, UserHistoryParams, CreateCommentParams, CommentsListingParams, UpdateCommentParams, CommentCountParams, PublicPoolsParams, PrivatePoolsParams, PoolListingByCreatorParams, VerifyAccessCodeParams, PoolTotalParticipantsParams, SearchPoolParams, RelatedPoolsParams, UpdateStreamingParams, UpdatePoolResolutionTimeParams, FindPoolFallbackParams, SignOraclesExtendTimeParams, UserTotalInvestmentParams, OptionsTotalVolumeParams, PoolActivityParams, TopHoldersParams, UserInvestedPoolsParams, InvestmentVolumeGraphParams, UserPnlGraphParams, TopWinnersLosersParams, PnlByPoolIdParams, PriceDataParams, AddReviewParams, GetUserOrdersParams, OrderBookParams, GetUserOrderByPoolIdParams, OrdersListingByPoolParams, AddUserPointsParams, UserOnboardingParams, PointsGraphParams, GetNotificationsParams, MarkNotificationAsReadParams, CreateDisputeMessageParams, GetPoolDisputeConvoParams, FollowToggleParams, FollowCheckParams, FollowListParams, FollowStatsParams, RainBurnPerPoolParams } from './api/types.js';
@@ -124,8 +126,8 @@ export class Rain {
     return buildAddLiquidityRawTx({ ...params, rpcUrl: this.rpcUrl! });
   }
 
-  buildRemoveLiquidityTx(params: RemoveLiquidityTxParams): RawTransaction {
-    return buildRemoveLiquidityRawTx(params);
+  async buildRemoveLiquidityTx(params: RemoveLiquidityTxParams): Promise<RawTransaction> {
+    return buildRemoveLiquidityRawTx({ ...params, rpcUrl: this.rpcUrl! });
   }
 
   async getUserOptionLPShares(params: {
@@ -143,6 +145,23 @@ export class Rain {
     userAddress: `0x${string}`;
   }): Promise<bigint> {
     return getUserOptionShares({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async getUserSharesInEscrow(params: {
+    marketContractAddress: `0x${string}`;
+    option: bigint;
+    optionSide: number;
+    userAddress: `0x${string}`;
+  }): Promise<bigint> {
+    return getUserSharesInEscrow({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async getOptionClaimed(params: {
+    marketContractAddress: `0x${string}`;
+    option: bigint;
+    userAddress: `0x${string}`;
+  }): Promise<boolean> {
+    return getOptionClaimed({ ...params, rpcUrl: this.rpcUrl! });
   }
 
   async getDynamicPayout(params: {

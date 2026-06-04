@@ -25,6 +25,9 @@ export interface EnterOptionTxParams {
     selectedOption: bigint;  // option index (1-based)
     optionSide: OptionSide;  // 0 = Yes, 1 = No
     buyAmountInWei: bigint;  // amount in base token wei
+    minSharesOut?: bigint;   // slippage protection: minimum shares to receive (auto-calculated if not set)
+    slippageTolerance?: bigint; // slippage % (e.g. 5n = 5%). Defaults to 5% if minSharesOut is not set
+    deadline?: bigint;       // unix timestamp deadline (0 = no deadline)
 }
 
 export interface PlaceBuyOrderTxParams {
@@ -102,12 +105,20 @@ export interface AddLiquidityTxParams {
     marketContractAddress: `0x${string}`;
     option: bigint;            // option index (1-based)
     totalAmountInWei: bigint;  // amount in base token wei
+    minYesToDeposit?: bigint;  // slippage protection: min yes tokens to deposit (auto-calculated if not set)
+    minNoToDeposit?: bigint;   // slippage protection: min no tokens to deposit (auto-calculated if not set)
+    slippageTolerance?: bigint; // slippage % (e.g. 5n = 5%). Defaults to 5% if min values not set
+    deadline?: bigint;         // unix timestamp deadline (defaults to now + 10 min)
 }
 
 export interface RemoveLiquidityTxParams {
     marketContractAddress: `0x${string}`;
     option: bigint;     // option index (1-based)
     lpShares: bigint;   // LP shares to remove
+    minYesOut?: bigint;  // slippage protection: min yes tokens to receive (auto-calculated if not set)
+    minNoOut?: bigint;   // slippage protection: min no tokens to receive (auto-calculated if not set)
+    slippageTolerance?: bigint; // slippage % (e.g. 5n = 5%). Defaults to 5% if min values not set
+    deadline?: bigint;   // unix timestamp deadline (defaults to now + 10 min)
 }
 
 export interface CreateMarketTxParams {
@@ -121,11 +132,12 @@ export interface CreateMarketTxParams {
     startTime: bigint; // unix timestamp (seconds)
     endTime: bigint;   // unix timestamp (seconds)
     no_of_options: bigint; // market options
-    disputeTimer: number;
+    disputeTimer: number; // oracle end time duration in seconds (e.g. 259200 = 3 days)
     inputAmountWei: bigint;
     barValues: number[]; // transformedBarValues
     baseToken: `0x${string}`; // TOKEN contract address
     tradingModel?: TradingModel;
+    initialYesPrices?: bigint[];
     marketImage: string;
     tokenDecimals?: number;
     factoryContractAddress?: `0x${string}`;
