@@ -58,7 +58,9 @@ export async function buildCreateMarketRawTx(
         ipfsUri: ipfsUrl,
         initialLiquidity: inputAmountWei,
         liquidityPercentages,
-        initialYesPrices: params.initialYesPrices ?? liquidityPercentages.map(() => 500000000000000000n),
+        initialYesPrices: (tradingModel ?? 0) === 1
+            ? liquidityPercentages.map(() => 0n)
+            : (params.initialYesPrices ?? liquidityPercentages.map(() => 500000000000000000n)),
         baseToken,
         tradingModel: tradingModel ?? 0,
     };
