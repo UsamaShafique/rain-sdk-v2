@@ -23,7 +23,7 @@ import { arbitrum } from 'viem/chains';
 
 // Initialize SDK
 const rain = new Rain({
-  environment: 'development', // 'development' | 'stage'
+  environment: 'development', // 'development' | 'stage' | 'production'
   rpcUrl: 'https://arb1.arbitrum.io/rpc', // optional, uses random public RPC if omitted
 });
 
@@ -56,7 +56,7 @@ const rain = new Rain(config?: RainCoreConfig);
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `environment` | `'development' \| 'stage'` | `'development'` | Target environment |
+| `environment` | `'development' \| 'stage' \| 'production'` | `'development'` | Target environment |
 | `rpcUrl` | `string` | Random public RPC | Custom Arbitrum RPC URL |
 | `apiUrl` | `string` | From environment | Custom API URL |
 
@@ -151,9 +151,10 @@ const txs = await rain.buildCreateMarketTx({
   startTime: BigInt(Math.floor(Date.now() / 1000) + 120), // 2 min from now
   endTime: BigInt(Math.floor(Date.now() / 1000) + 86400), // 24h from now
   no_of_options: 2n,
-  disputeTimer: 60, // seconds (set by SDK from environment)
+  disputeTimer: 259200, // oracle end time duration in seconds (e.g. 259200 = 3 days)
   inputAmountWei: parseUnits('10', 6), // 10 USDT
   barValues: [50, 50], // probability distribution (0-100, sums to 100)
+  initialYesPrices: [500000000000000000n, 500000000000000000n], // optional, 1e18 scale (50% = 5e17)
   baseToken: config.tokens.usdt.address, // USDT
   tradingModel: TradingModel.AMM, // AMM = 0, OrderBook = 1
   marketImage: 'https://cdn.example.com/market-image.png',
@@ -183,7 +184,9 @@ const txsRain = await rain.buildCreateMarketTx({
 | `endTime` | `bigint` | Unix timestamp (seconds) |
 | `no_of_options` | `bigint` | Number of options |
 | `inputAmountWei` | `bigint` | Initial liquidity in base token wei |
+| `disputeTimer` | `number` | Oracle end time duration in seconds (e.g. 259200 = 3 days). Auto-set from environment config |
 | `barValues` | `number[]` | Probability distribution (0-100 scale) |
+| `initialYesPrices` | `bigint[]` | *(Optional)* Initial Yes prices per option in 1e18 scale (e.g. `500000000000000000n` = 50%). Defaults to 50% per option |
 | `baseToken` | `0x${string}` | Base token address (USDT or RAIN) |
 | `tradingModel` | `TradingModel` | `AMM (0)` or `OrderBook (1)` |
 | `marketImage` | `string` | Market image URL (required) |
@@ -194,7 +197,7 @@ const txsRain = await rain.buildCreateMarketTx({
 
 #### `buildEnterOptionTx(params): Promise<RawTransaction[]>`
 
-Buy shares of an option (AMM trade). Automatically reads the market's base token, checks allowance, and includes approval TX if needed.
+Buy shares of an option (AMM trade). Automatically reads the market's base token, checks allowance, includes approval TX if needed, and calculates slippage protection via on-chain `getEntryShares`.
 
 ```typescript
 const txs = await rain.buildEnterOptionTx({
@@ -203,6 +206,8 @@ const txs = await rain.buildEnterOptionTx({
   optionSide: OptionSide.Yes, // Yes = 1, No = 2
   buyAmountInWei: parseUnits('5', 6), // 5 USDT (or parseUnits('5', 18) for RAIN)
   walletAddress: '0x...', // user's wallet address
+  slippageTolerance: 5n, // optional, default 5% — percentage tolerance for minSharesOut
+  deadline: 600n, // optional, default 600 (10 min) — duration in seconds
 });
 // Returns [approveTx?, enterOptionTx]
 ```
@@ -214,8 +219,11 @@ const txs = await rain.buildEnterOptionTx({
 | `optionSide` | `OptionSide` | `Yes (1)` or `No (2)` |
 | `buyAmountInWei` | `bigint` | Amount in base token wei |
 | `walletAddress` | `0x${string}` | User's wallet address (for allowance check) |
+| `minSharesOut` | `bigint` | *(Optional)* Minimum shares to receive. Auto-calculated from `getEntryShares` with slippage if not set |
+| `slippageTolerance` | `bigint` | *(Optional)* Slippage percentage (e.g. `5n` = 5%). Default: 5% |
+| `deadline` | `bigint` | *(Optional)* Duration in seconds (e.g. `600n` = 10 min). Default: 600 |
 
-> **Note:** Approval is handled automatically. The SDK reads `baseToken` from the market contract and checks allowance before building transactions.
+> **Note:** Approval is handled automatically. The SDK reads `baseToken` from the market contract and checks allowance before building transactions. Slippage protection is auto-calculated: the SDK calls `getEntryShares` on-chain to get expected shares, then applies the slippage tolerance.
 
 ---
 
@@ -257,7 +265,7 @@ const tx = rain.buildMergeTx({
 
 #### `buildAddLiquidityTx(params): Promise<RawTransaction[]>`
 
-Add liquidity to a specific option. Automatically checks allowance and includes approval TX if needed.
+Add liquidity to a specific option. Automatically checks allowance, includes approval TX if needed, and calculates slippage protection from on-chain AMM reserves.
 
 ```typescript
 const txs = await rain.buildAddLiquidityTx({
@@ -265,15 +273,28 @@ const txs = await rain.buildAddLiquidityTx({
   option: 1n,
   totalAmountInWei: parseUnits('10', 6), // 10 USDT
   walletAddress: '0x...', // user's wallet address
+  slippageTolerance: 5n, // optional, default 5%
+  deadline: 600n, // optional, default 600 (10 min) — duration in seconds
 });
 // Returns [approveTx?, addLiquidityTx]
 ```
 
-> **Note:** Approval is handled automatically.
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `marketContractAddress` | `0x${string}` | Market contract address |
+| `option` | `bigint` | Option index (1-based) |
+| `totalAmountInWei` | `bigint` | Amount in base token wei |
+| `walletAddress` | `0x${string}` | User's wallet address (for allowance check) |
+| `minYesToDeposit` | `bigint` | *(Optional)* Min yes tokens to deposit. Auto-calculated from reserves if not set |
+| `minNoToDeposit` | `bigint` | *(Optional)* Min no tokens to deposit. Auto-calculated from reserves if not set |
+| `slippageTolerance` | `bigint` | *(Optional)* Slippage percentage (e.g. `5n` = 5%). Default: 5% |
+| `deadline` | `bigint` | *(Optional)* Duration in seconds (e.g. `600n` = 10 min). Default: 600 |
 
-#### `buildRemoveLiquidityTx(params: RemoveLiquidityTxParams): RawTransaction`
+> **Note:** Approval is handled automatically. Slippage protection is auto-calculated from `ammYesReserve`/`ammNoReserve` proportionally.
 
-Remove liquidity by burning LP shares.
+#### `buildRemoveLiquidityTx(params: RemoveLiquidityTxParams): Promise<RawTransaction>`
+
+Remove liquidity by burning LP shares. Automatically calculates slippage protection via on-chain `getRemovedLiquidity`.
 
 ```typescript
 const lpShares = await rain.getUserOptionLPShares({
@@ -282,12 +303,24 @@ const lpShares = await rain.getUserOptionLPShares({
   userAddress: '0x...',
 });
 
-const tx = rain.buildRemoveLiquidityTx({
+const tx = await rain.buildRemoveLiquidityTx({
   marketContractAddress: '0x...',
   option: 1n,
   lpShares, // raw LP shares amount
+  slippageTolerance: 5n, // optional, default 5%
+  deadline: 600n, // optional, default 600 (10 min) — duration in seconds
 });
 ```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `marketContractAddress` | `0x${string}` | Market contract address |
+| `option` | `bigint` | Option index (1-based) |
+| `lpShares` | `bigint` | LP shares to remove |
+| `minYesOut` | `bigint` | *(Optional)* Min yes tokens to receive. Auto-calculated from `getRemovedLiquidity` if not set |
+| `minNoOut` | `bigint` | *(Optional)* Min no tokens to receive. Auto-calculated if not set |
+| `slippageTolerance` | `bigint` | *(Optional)* Slippage percentage (e.g. `5n` = 5%). Default: 5% |
+| `deadline` | `bigint` | *(Optional)* Duration in seconds (e.g. `600n` = 10 min). Default: 600 |
 
 ---
 
@@ -484,6 +517,19 @@ const yesShares = await rain.getUserOptionShares({
 });
 ```
 
+### `getOptionClaimed(params): Promise<boolean>`
+
+Check if a user has already claimed winnings for a specific option.
+
+```typescript
+const claimed = await rain.getOptionClaimed({
+  marketContractAddress: '0x...',
+  option: 1n,
+  userAddress: '0x...',
+});
+// true if already claimed, false otherwise
+```
+
 ### `getDynamicPayout(params): Promise<bigint[]>`
 
 Get the dynamic payout amounts for a user on a specific option. Returns an array of payout values per side.
@@ -659,8 +705,9 @@ enum OptionSide {
 
 | Environment | API | Factory | USDT | RAIN |
 |-------------|-----|---------|------|------|
-| `development` | `https://dev2-api.rain.one` | `0xBD99...0adE` | 6 decimals | 18 decimals |
-| `stage` | `https://stg2-api.rain.one` | `0x4b93...2884` | 6 decimals | 18 decimals |
+| `development` | `https://dev2-api.rain.one` | `0xbbDd...f02f` | 6 decimals | 18 decimals |
+| `stage` | `https://stg2-api.rain.one` | `0x16cc...628d` | 6 decimals | 18 decimals |
+| `production` | `https://prod2-api.rain.one` | `0x38B3...C677` | 6 decimals | 18 decimals |
 
 ### Supported Tokens
 
@@ -672,7 +719,7 @@ const config = rain.getEnvironmentConfig();
 // USDT
 config.tokens.usdt.address   // Token contract address
 config.tokens.usdt.decimals  // 6
-config.tokens.usdt.symbol    // "USDTm" (dev) or "USD₮0" (stage)
+config.tokens.usdt.symbol    // "USDTm" (dev) or "USD₮0" (stage/production)
 
 // RAIN
 config.tokens.rain.address   // Token contract address
@@ -692,7 +739,8 @@ config.tokens.rain.symbol    // "RAIN"
 5. Wait for endTime to pass
 6. Close Pool (buildClosePoolAITx / buildClosePoolManualTx)
 7. Calculate Winner (buildCalculateWinnerTx)
-8. Claim (buildClaimTx)
+8. Check if claimed (getOptionClaimed) — optional
+9. Claim (buildClaimTx)
 ```
 
 If disputed:
