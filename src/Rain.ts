@@ -37,6 +37,7 @@ import * as notificationsApi from './api/notifications.js';
 import * as rainBurnApi from './api/rainBurn.js';
 import * as disputeApi from './api/dispute.js';
 import * as followApi from './api/follow.js';
+import * as whitelistedTokensApi from './api/whitelistedTokens.js';
 
 const erc20AllowanceAbi = parseAbi(['function allowance(address owner, address spender) view returns (uint256)']);
 const factoryViewAbi = parseAbi([
@@ -44,8 +45,6 @@ const factoryViewAbi = parseAbi([
   'function liquidityFee() view returns (uint256)',
   'function baseToken() view returns (address)',
 ]);
-const erc20DecimalsAbi = parseAbi(['function decimals() view returns (uint8)']);
-
 export class Rain {
 
   public readonly environment: RainEnvironment;
@@ -92,7 +91,7 @@ export class Rain {
     return buildApproveRawTx(params);
   }
 
-  async getCreateMarketFees(tokenAddress: `0x${string}`): Promise<{ oracleFeePerOption: bigint; liquidityFeeBps: bigint }> {
+  async getCreateMarketFees(tokenAddress: `0x${string}`, inputAmountWei: bigint): Promise<{ oracleFeePerOption: bigint; liquidityFeeBps: bigint; useBufferApproval: boolean; perOptionBuffer: bigint }> {
     const pc = createPublicClient({ chain: arbitrum, transport: http(this.rpcUrl) });
     const [oracleFeeRaw, liquidityFeeBps, factoryBaseToken] = await Promise.all([
       pc.readContract({ address: this.marketFactory, abi: factoryViewAbi, functionName: 'oracleFixedFee' }),
@@ -100,19 +99,20 @@ export class Rain {
       pc.readContract({ address: this.marketFactory, abi: factoryViewAbi, functionName: 'baseToken' }),
     ]);
     if (tokenAddress.toLowerCase() === (factoryBaseToken as string).toLowerCase()) {
-      return { oracleFeePerOption: oracleFeeRaw as bigint, liquidityFeeBps: liquidityFeeBps as bigint };
+      return { oracleFeePerOption: oracleFeeRaw as bigint, liquidityFeeBps: liquidityFeeBps as bigint, useBufferApproval: false, perOptionBuffer: 0n };
     }
-    const baseTokenDecimals = await pc.readContract({ address: factoryBaseToken as `0x${string}`, abi: erc20DecimalsAbi, functionName: 'decimals' });
-    const tokenConfig = this.getTokenConfig(tokenAddress);
-    const tokenDecimals = BigInt(tokenConfig?.decimals ?? 18);
-    const oracleFeePerOption = (oracleFeeRaw as bigint) * (10n ** (tokenDecimals - BigInt(baseTokenDecimals)));
-    return { oracleFeePerOption, liquidityFeeBps: liquidityFeeBps as bigint };
+    // For non-base tokens (e.g. RAIN): approval = initialLiquidity + (numberOfOptions * 20% of initialLiquidity)
+    const perOptionBuffer = inputAmountWei * 20n / 100n;
+    return { oracleFeePerOption: 0n, liquidityFeeBps: liquidityFeeBps as bigint, useBufferApproval: true, perOptionBuffer };
   }
 
   async buildCreateMarketTx(params: CreateMarketTxParams): Promise<RawTransaction[]> {
     const tokenConfig = this.getTokenConfig(params.baseToken);
     const tokenDecimals = params.tokenDecimals ?? tokenConfig?.decimals ?? 6;
-    const { oracleFeePerOption, liquidityFeeBps } = await this.getCreateMarketFees(params.baseToken);
+    const { oracleFeePerOption, liquidityFeeBps, useBufferApproval, perOptionBuffer } = await this.getCreateMarketFees(params.baseToken, params.inputAmountWei);
+    if (useBufferApproval) {
+      return buildCreateMarketRawTx({ ...params, tokenDecimals, factoryContractAddress: this.marketFactory, apiUrl: this.apiUrl, rpcUrl: this.rpcUrl, disputeTimer: this.distute_initial_timer, oracleFixedFeePerOption: perOptionBuffer });
+    }
     const liquidityFeeAmount = params.inputAmountWei * liquidityFeeBps / 10000n;
     const totalOracleFee = oracleFeePerOption * BigInt(params.no_of_options) + liquidityFeeAmount;
     return buildCreateMarketRawTx({ ...params, tokenDecimals, factoryContractAddress: this.marketFactory, apiUrl: this.apiUrl, rpcUrl: this.rpcUrl, disputeTimer: this.distute_initial_timer, oracleFixedFeePerOption: totalOracleFee / BigInt(params.no_of_options) + 1n });
@@ -613,5 +613,11 @@ export class Rain {
 
   async getFollowStats(params: FollowStatsParams, accessToken?: string) {
     return followApi.getFollowStats(params, this.cfg(accessToken));
+  }
+
+  // ─── Whitelisted Tokens ─────────────────────────────────────────────────────
+
+  async getTokenPrice(tokenAddress: string) {
+    return whitelistedTokensApi.getTokenPrice(tokenAddress, this.cfg());
   }
 }

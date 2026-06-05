@@ -12,3 +12,4 @@ export * from './notifications.js';
 export * from './rainBurn.js';
 export * from './dispute.js';
 export * from './follow.js';
+export * from './whitelistedTokens.js';

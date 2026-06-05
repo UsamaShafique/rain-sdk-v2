@@ -167,8 +167,9 @@ const txsRain = await rain.buildCreateMarketTx({
   baseToken: config.tokens.rain.address, // RAIN token
 });
 
-// Approval amount = liquidity + (oracleFixedFeePerOption * numberOfOptions)
-// Oracle fee is automatically calculated based on the token's decimals
+// Approval for USDT: liquidity + (oracleFixedFeePerOption * numberOfOptions)
+// Approval for RAIN: liquidity + (numberOfOptions * 20% of liquidity)
+// e.g. 1000 RAIN with 5 options → 1000 + (5 * 200) = 2000 RAIN approval
 ```
 
 | Parameter | Type | Description |
@@ -1066,6 +1067,14 @@ await rain.createDisputeMessage({
 
 // Get dispute conversation for a sub-pool
 const convo = await rain.getPoolDisputeConvo({ poolId: '...', subPool: '...', limit: 50, offset: 0 }, accessToken);
+```
+
+### Whitelisted Tokens
+
+```typescript
+// Get token price in USD
+const priceData = await rain.getTokenPrice('0x...'); // token contract address
+// priceData.data = { price: 0.05 } — USD price per token
 ```
 
 ---
