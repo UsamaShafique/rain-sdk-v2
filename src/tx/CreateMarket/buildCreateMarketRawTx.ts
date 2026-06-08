@@ -58,14 +58,10 @@ export async function buildCreateMarketRawTx(
         ipfsUri: ipfsUrl,
         initialLiquidity: inputAmountWei,
         liquidityPercentages,
-        initialYesPrices: (tradingModel ?? 0) === 1
-            ? liquidityPercentages.map(() => 0n)
-            : (params.initialYesPrices ?? liquidityPercentages.map(() => 500000000000000000n)),
+        initialYesPrices: params.initialYesPrices ?? liquidityPercentages.map(() => 500000000000000000n),
         baseToken,
         tradingModel: tradingModel ?? 0,
     };
-
-    console.log('createMarketParams: ', createMarketParams)
 
     createMarketTransactions.push({
         to: factoryContractAddress,

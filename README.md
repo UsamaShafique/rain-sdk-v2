@@ -187,7 +187,7 @@ const txsRain = await rain.buildCreateMarketTx({
 | `inputAmountWei` | `bigint` | Initial liquidity in base token wei |
 | `disputeTimer` | `number` | Oracle end time duration in seconds (e.g. 259200 = 3 days). Auto-set from environment config |
 | `barValues` | `number[]` | Probability distribution (0-100 scale) |
-| `initialYesPrices` | `bigint[]` | *(Optional)* Initial Yes prices per option in 1e18 scale (e.g. `500000000000000000n` = 50%). Defaults to 50% for AMM. Forced to `0n` for OrderBook |
+| `initialYesPrices` | `bigint[]` | *(Optional)* Initial Yes prices per option in 1e18 scale (e.g. `500000000000000000n` = 50%). Defaults to 50% for both AMM and OrderBook |
 | `baseToken` | `0x${string}` | Base token address (USDT or RAIN) |
 | `tradingModel` | `TradingModel` | `AMM (0)` or `OrderBook (1)` |
 | `marketImage` | `string` | Market image URL (required) |
