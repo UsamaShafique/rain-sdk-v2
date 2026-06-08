@@ -1,6 +1,6 @@
 {
     "name": "rain-sdk-v2",
-    "version": "2.0.4",
+    "version": "2.0.5",
     "type": "module",
     "description": "Rain SDK V2 — TypeScript SDK for Rain prediction markets on Arbitrum. Market creation, trading, liquidity, order book, split/merge, dispute, and smart account support.",
     "main": "dist/index.js",

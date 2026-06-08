@@ -531,6 +531,17 @@ const claimed = await rain.getOptionClaimed({
 // true if already claimed, false otherwise
 ```
 
+### `getDisputeWindow(params): Promise<bigint>`
+
+Get the dispute window duration (in seconds) for a market contract.
+
+```typescript
+const window = await rain.getDisputeWindow({
+  marketContractAddress: '0x...',
+});
+// window = dispute window in seconds (e.g. 7200n = 2 hours)
+```
+
 ### `getDynamicPayout(params): Promise<bigint[]>`
 
 Get the dynamic payout amounts for a user on a specific option. Returns an array of payout values per side.
