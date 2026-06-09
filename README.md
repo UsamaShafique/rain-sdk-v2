@@ -228,6 +228,34 @@ const txs = await rain.buildEnterOptionTx({
 
 ---
 
+#### `buildSellOptionTx(params): Promise<RawTransaction>`
+
+Market-sell shares of an option into the resting buy order book. No approval needed (you're selling shares, not tokens). Slippage protection is auto-calculated from on-chain `getCurrentPrice`.
+
+```typescript
+const tx = await rain.buildSellOptionTx({
+  marketContractAddress: '0x...',
+  selectedOption: 1n, // 1-based option index
+  optionSide: OptionSide.Yes, // Yes = 1, No = 2
+  sharesAmount: parseUnits('10', 6), // shares to sell
+  slippageTolerance: 5n, // optional, default 5%
+  deadline: 600n, // optional, default 600 (10 min) — duration in seconds
+});
+// Returns a single RawTransaction (no approval needed)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `marketContractAddress` | `0x${string}` | Market contract address |
+| `selectedOption` | `bigint` | Option index (1-based) |
+| `optionSide` | `OptionSide` | `Yes (1)` or `No (2)` |
+| `sharesAmount` | `bigint` | Number of shares to sell |
+| `minAmountOut` | `bigint` | *(Optional)* Minimum base tokens to receive. Auto-calculated from `getCurrentPrice` with slippage if not set |
+| `slippageTolerance` | `bigint` | *(Optional)* Slippage percentage (e.g. `5n` = 5%). Default: 5% |
+| `deadline` | `bigint` | *(Optional)* Duration in seconds (e.g. `600n` = 10 min). Default: 600 |
+
+---
+
 ### Split & Merge
 
 #### `buildSplitTx(params): Promise<RawTransaction[]>`
@@ -529,6 +557,21 @@ const claimed = await rain.getOptionClaimed({
   userAddress: '0x...',
 });
 // true if already claimed, false otherwise
+```
+
+### `getEntryShares(params): Promise<{ returnedShares: bigint; expectedReward: bigint }>`
+
+Calculate how many shares you'd receive for a given buy amount, plus the expected reward.
+
+```typescript
+const result = await rain.getEntryShares({
+  marketContractAddress: '0x...',
+  option: 1n,       // 1-based option index
+  optionSide: 1,    // 1 = Yes, 2 = No
+  amount: 1000000n, // buy amount in base token wei
+});
+// result.returnedShares = shares you'd receive
+// result.expectedReward = expected reward amount
 ```
 
 ### `getDisputeWindow(params): Promise<bigint>`

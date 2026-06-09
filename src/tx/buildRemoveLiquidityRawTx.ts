@@ -5,7 +5,7 @@ import { RemoveLiquidityTxParams, RawTransaction } from "./types.js";
 import { REMOVE_LIQUIDITY } from "../constants/contractmethods.js";
 
 const DEFAULT_SLIPPAGE = 5n; // 5%
-const DEFAULT_DEADLINE_SECONDS = 600n; // 10 minutes
+const DEFAULT_DEADLINE_DURATION = 600; // 10 minutes
 
 export async function buildRemoveLiquidityRawTx(
     params: RemoveLiquidityTxParams & { rpcUrl: string }
@@ -42,7 +42,7 @@ export async function buildRemoveLiquidityRawTx(
         data: encodeFunctionData({
             abi: MarketsAbi,
             functionName: REMOVE_LIQUIDITY,
-            args: [option, lpShares, effectiveMinYes ?? 0n, effectiveMinNo ?? 0n, deadline ?? DEFAULT_DEADLINE_SECONDS],
+            args: [option, lpShares, effectiveMinYes ?? 0n, effectiveMinNo ?? 0n, deadline ?? BigInt(Math.floor(Date.now() / 1000) + DEFAULT_DEADLINE_DURATION)],
         }),
         value: 0n,
     };

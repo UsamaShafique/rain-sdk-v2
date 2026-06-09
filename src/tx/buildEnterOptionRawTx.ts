@@ -7,7 +7,7 @@ import { checkMarketTokenAllowance } from "../utils/helpers.js";
 import { buildApproveRawTx } from "./buildApprovalRawTx.js";
 
 const DEFAULT_SLIPPAGE = 5n; // 5%
-const DEFAULT_DEADLINE_SECONDS = 600n; // 10 minutes
+const DEFAULT_DEADLINE_DURATION = 600; // 10 minutes
 
 export async function buildEnterOptionRawTx(
     params: EnterOptionTxParams & { walletAddress: `0x${string}`; rpcUrl: string }
@@ -51,7 +51,7 @@ export async function buildEnterOptionRawTx(
         data: encodeFunctionData({
             abi: MarketsAbi,
             functionName: ENTER_OPTION,
-            args: [selectedOption, optionSide, buyAmountInWei, effectiveMinShares, deadline ?? DEFAULT_DEADLINE_SECONDS],
+            args: [selectedOption, optionSide, buyAmountInWei, effectiveMinShares, deadline ?? BigInt(Math.floor(Date.now() / 1000) + DEFAULT_DEADLINE_DURATION)],
         }),
         value: 0n,
     });

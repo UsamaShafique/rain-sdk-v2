@@ -27,7 +27,16 @@ export interface EnterOptionTxParams {
     buyAmountInWei: bigint;  // amount in base token wei
     minSharesOut?: bigint;   // slippage protection: minimum shares to receive (auto-calculated if not set)
     slippageTolerance?: bigint; // slippage % (e.g. 5n = 5%). Defaults to 5% if minSharesOut is not set
-    deadline?: bigint;       // unix timestamp deadline (0 = no deadline)
+    deadline?: bigint;       // absolute unix timestamp (defaults to now + 10 min)
+}
+
+export interface SellOptionTxParams {
+    marketContractAddress: `0x${string}`;
+    selectedOption: bigint;  // option index (1-based)
+    optionSide: OptionSide;  // Yes = 1, No = 2
+    sharesAmount: bigint;    // number of shares to sell
+    minAmountOut?: bigint;   // slippage protection: minimum base tokens to receive (defaults to 0)
+    deadline?: bigint;       // absolute unix timestamp (defaults to now + 10 min)
 }
 
 export interface PlaceBuyOrderTxParams {

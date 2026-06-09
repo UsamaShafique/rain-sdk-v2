@@ -1,7 +1,8 @@
-import { ApproveTxParams, CreateMarketTxParams, EnterOptionTxParams, AddLiquidityTxParams, RemoveLiquidityTxParams, SplitTxParams, MergeTxParams, ClosePoolAITxParams, ClosePoolManualTxParams, ChooseWinnerTxParams, PlaceBuyOrderTxParams, PlaceSellOrderTxParams, OpenDisputeTxParams, ClaimTxParams, CancelBuyOrdersTxParams, CancelSellOrdersTxParams, RawTransaction } from './tx/types.js';
+import { ApproveTxParams, CreateMarketTxParams, EnterOptionTxParams, SellOptionTxParams, AddLiquidityTxParams, RemoveLiquidityTxParams, SplitTxParams, MergeTxParams, ClosePoolAITxParams, ClosePoolManualTxParams, ChooseWinnerTxParams, PlaceBuyOrderTxParams, PlaceSellOrderTxParams, OpenDisputeTxParams, ClaimTxParams, CancelBuyOrdersTxParams, CancelSellOrdersTxParams, RawTransaction } from './tx/types.js';
 import { buildApproveRawTx } from './tx/buildApprovalRawTx.js';
 import { buildCreateMarketRawTx } from './tx/CreateMarket/buildCreateMarketRawTx.js';
 import { buildEnterOptionRawTx } from './tx/buildEnterOptionRawTx.js';
+import { buildSellOptionRawTx } from './tx/buildSellOptionRawTx.js';
 import { buildAddLiquidityRawTx } from './tx/buildAddLiquidityRawTx.js';
 import { buildRemoveLiquidityRawTx } from './tx/buildRemoveLiquidityRawTx.js';
 import { buildSplitRawTx } from './tx/buildSplitRawTx.js';
@@ -23,6 +24,7 @@ import { getDynamicPayout } from './markets/getDynamicPayout.js';
 import { getUserSharesInEscrow } from './markets/getUserSharesInEscrow.js';
 import { getOptionClaimed } from './markets/getOptionClaimed.js';
 import { getDisputeWindow } from './markets/getDisputeWindow.js';
+import { getEntryShares, EntrySharesResult } from './markets/getEntryShares.js';
 import { createPublicClient, http, parseAbi } from 'viem';
 import { arbitrum } from 'viem/chains';
 import type { ApiConfig, UserProfileUpdateParams, UserHistoryParams, CreateCommentParams, CommentsListingParams, UpdateCommentParams, CommentCountParams, PublicPoolsParams, PrivatePoolsParams, PoolListingByCreatorParams, VerifyAccessCodeParams, PoolTotalParticipantsParams, SearchPoolParams, RelatedPoolsParams, UpdateStreamingParams, UpdatePoolResolutionTimeParams, FindPoolFallbackParams, SignOraclesExtendTimeParams, UserTotalInvestmentParams, OptionsTotalVolumeParams, PoolActivityParams, TopHoldersParams, UserInvestedPoolsParams, InvestmentVolumeGraphParams, UserPnlGraphParams, TopWinnersLosersParams, PnlByPoolIdParams, PriceDataParams, AddReviewParams, GetUserOrdersParams, OrderBookParams, GetUserOrderByPoolIdParams, OrdersListingByPoolParams, AddUserPointsParams, UserOnboardingParams, PointsGraphParams, GetNotificationsParams, MarkNotificationAsReadParams, CreateDisputeMessageParams, GetPoolDisputeConvoParams, FollowToggleParams, FollowCheckParams, FollowListParams, FollowStatsParams, RainBurnPerPoolParams } from './api/types.js';
@@ -123,6 +125,10 @@ export class Rain {
     return buildEnterOptionRawTx({ ...params, rpcUrl: this.rpcUrl! });
   }
 
+  buildSellOptionTx(params: SellOptionTxParams): RawTransaction {
+    return buildSellOptionRawTx(params);
+  }
+
   async buildAddLiquidityTx(params: AddLiquidityTxParams & { walletAddress: `0x${string}` }): Promise<RawTransaction[]> {
     return buildAddLiquidityRawTx({ ...params, rpcUrl: this.rpcUrl! });
   }
@@ -169,6 +175,15 @@ export class Rain {
     marketContractAddress: `0x${string}`;
   }): Promise<bigint> {
     return getDisputeWindow({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async getEntryShares(params: {
+    marketContractAddress: `0x${string}`;
+    option: bigint;
+    optionSide: number;
+    amount: bigint;
+  }): Promise<EntrySharesResult> {
+    return getEntryShares({ ...params, rpcUrl: this.rpcUrl! });
   }
 
   async getDynamicPayout(params: {
