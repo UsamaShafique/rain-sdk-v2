@@ -32,8 +32,8 @@ export function validateCreateMarketParams(params: CreateMarketTxParams) {
     if (marketOptions.some(opt => !opt?.toString().trim())) {
         throw new Error("options cannot contain empty values");
     }
-    if (!Array.isArray(marketTags) || marketTags.length < 1 || marketTags.length > 3) {
-        throw new Error("tags must be between 1 and 3");
+    if (!Array.isArray(marketTags) || marketTags.length < 1 || marketTags.length > 15) {
+        throw new Error("tags must be between 1 and 15");
     }
     if (marketTags.some(tag => !tag?.toString().trim())) {
         throw new Error("tags cannot contain empty values");
