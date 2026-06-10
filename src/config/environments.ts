@@ -24,7 +24,7 @@ export const ENV_CONFIG = {
     development: {
         apiUrl: "https://dev2-api.rain.one",
         market_factory_address: "0xbbDd9F2436d3F2e88588c6d28630557e8066f02f" as `0x${string}`,
-        dispute_initial_timer: 3 * 24 * 60 * 60,
+        dispute_initial_timer: 5 * 60,
         tokens: {
             usdt: {
                 address: "0xCa4f77A38d8552Dd1D5E44e890173921B67725F4" as `0x${string}`,
@@ -44,7 +44,7 @@ export const ENV_CONFIG = {
     stage: {
         apiUrl: "https://stg2-api.rain.one",
         market_factory_address: "0x16ccF044f8AE910888d96e9cae6ba22AFEDE628d" as `0x${string}`,
-        dispute_initial_timer: 3 * 24 * 60 * 60,
+        dispute_initial_timer: 5 * 60,
         tokens: {
             usdt: {
                 address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9" as `0x${string}`,
