@@ -13,6 +13,7 @@ import { buildOpenDisputeRawTx } from './tx/buildOpenDisputeRawTx.js';
 import { buildClaimRawTx } from './tx/buildClaimRawTx.js';
 import { buildCancelBuyOrdersRawTx, buildCancelSellOrdersRawTx } from './tx/buildCancelOrdersRawTx.js';
 import { buildCalculateWinnerRawTx, CalculateWinnerTxParams } from './tx/buildCalculateWinnerRawTx.js';
+import { buildExtendTimeRawTx, ExtendTimeTxParams } from './tx/buildExtendTimeRawTx.js';
 import { getUserActiveBuyOrders, getUserActiveSellOrders, getFirstBuyOrderPrice, getFirstSellOrderPrice, getBuyOrdersAtPrice, getSellOrdersAtPrice, checkOrderExists } from './markets/getOrderInfo.js';
 import { RainCoreConfig, RainEnvironment } from './types.js';
 import { ALLOWED_ENVIRONMENTS, ENV_CONFIG, getRandomRpc } from './config/environments.js';
@@ -228,6 +229,10 @@ export class Rain {
 
   async buildCalculateWinnerTx(params: CalculateWinnerTxParams): Promise<RawTransaction> {
     return buildCalculateWinnerRawTx({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async buildExtendTimeTx(params: ExtendTimeTxParams): Promise<RawTransaction> {
+    return buildExtendTimeRawTx({ ...params, rpcUrl: this.rpcUrl! });
   }
 
   buildClaimTx(params: ClaimTxParams): RawTransaction {

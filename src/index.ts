@@ -5,6 +5,8 @@ export { TradingModel, OptionSide } from './tx/types.js';
 export type { CreateMarketTxParams, EnterOptionTxParams, AddLiquidityTxParams, RemoveLiquidityTxParams, SplitTxParams, MergeTxParams, ClosePoolAITxParams, ClosePoolManualTxParams, ChooseWinnerTxParams, PlaceBuyOrderTxParams, PlaceSellOrderTxParams, OpenDisputeTxParams, ClaimTxParams, CancelBuyOrdersTxParams, CancelSellOrdersTxParams, RawTransaction, ApproveTxParams } from './tx/types.js';
 export type { LoginParams, LoginResult } from './auth/types.js';
 export { signLoginMessage } from './auth/signMessage.js';
+export type { ExtendTimeTxParams } from './tx/buildExtendTimeRawTx.js';
+export type { CalculateWinnerTxParams } from './tx/buildCalculateWinnerRawTx.js';
 export type { TokenConfig } from './config/environments.js';
 export * from './api/index.js';
 export { RainSocket } from './socket/RainSocket.js';

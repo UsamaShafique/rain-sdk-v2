@@ -459,6 +459,35 @@ const tx = await rain.buildCalculateWinnerTx({
 
 ---
 
+#### `buildExtendTimeTx(params: ExtendTimeTxParams): Promise<RawTransaction>`
+
+Extend the resolution time of a market option. Requires a signature from the oracle backend (obtained via `signOraclesExtendTime` API). Reads `optionResolver(option)` from the market and calls `extendTime(newEndTime, signature)` on that resolver contract.
+
+```typescript
+// 1. Get the signature from the API
+const signResult = await rain.signOraclesExtendTime(
+  { contractAddress: '0x...', walletAddress: '0x...' },
+  accessToken
+);
+
+// 2. Build the extend time transaction
+const tx = await rain.buildExtendTimeTx({
+  marketContractAddress: '0x...',
+  option: 1n,
+  newEndTime: BigInt(Math.floor(Date.now() / 1000) + 86400), // extend by 1 day
+  signature: signResult.signature, // from API
+});
+```
+
+| Param | Type | Description |
+|---|---|---|
+| `marketContractAddress` | `0x${string}` | Market contract address |
+| `option` | `bigint` | Option index (1-based) |
+| `newEndTime` | `bigint` | New end time as unix timestamp (seconds) |
+| `signature` | `0x${string}` | Backend signature from `signOraclesExtendTime` |
+
+---
+
 ### Claiming
 
 #### `buildClaimTx(params: ClaimTxParams): RawTransaction`
@@ -802,6 +831,11 @@ If disputed:
 ```
 6b. Open Dispute (buildOpenDisputeTx)
 6c. Appeal (buildOpenDisputeTx again)
+```
+
+If extending time:
+```
+5b. Extend Time (signOraclesExtendTime API → buildExtendTimeTx)
 ```
 
 ---
