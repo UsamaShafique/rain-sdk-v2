@@ -1017,6 +1017,17 @@ const count = await rain.getUserInvestedLivePoolsCount(accessToken);
 
 // Calculate user open interest
 const oi = await rain.calculateUserOpenInterest(accessToken);
+
+// Get the authenticated user's positions in a specific subPool
+// (per-side net shares, weighted average buy price, projected payout on win)
+const positions = await rain.getUserPositions(
+  { poolId: '...', subPoolIndex: 1 },
+  accessToken
+);
+
+// Get the authenticated user's open positions across all subPools of a pool
+// (one entry per (subPool, side) the user still holds; excludes claimed / losing sides)
+const open = await rain.getOpenPositions({ poolId: '...' }, accessToken);
 ```
 
 ### Orders

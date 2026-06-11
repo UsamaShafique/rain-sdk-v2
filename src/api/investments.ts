@@ -2,6 +2,7 @@ import {
   ApiConfig, ApiResponse, UserTotalInvestmentParams, OptionsTotalVolumeParams,
   PoolActivityParams, TopHoldersParams, UserInvestedPoolsParams,
   InvestmentVolumeGraphParams, UserPnlGraphParams, TopWinnersLosersParams, PnlByPoolIdParams,
+  UserPositionsParams, OpenPositionsParams,
 } from './types.js';
 import { buildHeaders, buildQuery, handleResponse } from './helpers.js';
 
@@ -178,6 +179,29 @@ export async function getUserInvestedLivePoolsCount(config: ApiConfig): Promise<
 
 export async function calculateUserOpenInterest(config: ApiConfig): Promise<ApiResponse> {
   const res = await fetch(`${config.apiUrl}/investments/calculate-user-open-interest`, {
+    method: 'GET',
+    headers: buildHeaders(config),
+  });
+  return handleResponse(res);
+}
+
+export async function getUserPositions(
+  params: UserPositionsParams,
+  config: ApiConfig
+): Promise<ApiResponse> {
+  const qs = buildQuery({ subPoolIndex: params.subPoolIndex });
+  const res = await fetch(`${config.apiUrl}/investments/${encodeURIComponent(params.poolId)}/user-positions${qs}`, {
+    method: 'GET',
+    headers: buildHeaders(config),
+  });
+  return handleResponse(res);
+}
+
+export async function getOpenPositions(
+  params: OpenPositionsParams,
+  config: ApiConfig
+): Promise<ApiResponse> {
+  const res = await fetch(`${config.apiUrl}/investments/${encodeURIComponent(params.poolId)}/open-positions`, {
     method: 'GET',
     headers: buildHeaders(config),
   });

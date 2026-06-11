@@ -28,7 +28,7 @@ import { getDisputeWindow } from './markets/getDisputeWindow.js';
 import { getEntryShares, EntrySharesResult } from './markets/getEntryShares.js';
 import { createPublicClient, http, parseAbi } from 'viem';
 import { arbitrum } from 'viem/chains';
-import type { ApiConfig, UserProfileUpdateParams, UserHistoryParams, CreateCommentParams, CommentsListingParams, UpdateCommentParams, CommentCountParams, PublicPoolsParams, PrivatePoolsParams, PoolListingByCreatorParams, VerifyAccessCodeParams, PoolTotalParticipantsParams, SearchPoolParams, RelatedPoolsParams, UpdateStreamingParams, UpdatePoolResolutionTimeParams, FindPoolFallbackParams, SignOraclesExtendTimeParams, UserTotalInvestmentParams, OptionsTotalVolumeParams, PoolActivityParams, TopHoldersParams, UserInvestedPoolsParams, InvestmentVolumeGraphParams, UserPnlGraphParams, TopWinnersLosersParams, PnlByPoolIdParams, PriceDataParams, AddReviewParams, GetUserOrdersParams, OrderBookParams, GetUserOrderByPoolIdParams, OrdersListingByPoolParams, AddUserPointsParams, UserOnboardingParams, PointsGraphParams, GetNotificationsParams, MarkNotificationAsReadParams, CreateDisputeMessageParams, GetPoolDisputeConvoParams, FollowToggleParams, FollowCheckParams, FollowListParams, FollowStatsParams, RainBurnPerPoolParams } from './api/types.js';
+import type { ApiConfig, UserProfileUpdateParams, UserHistoryParams, CreateCommentParams, CommentsListingParams, UpdateCommentParams, CommentCountParams, PublicPoolsParams, PrivatePoolsParams, PoolListingByCreatorParams, VerifyAccessCodeParams, PoolTotalParticipantsParams, SearchPoolParams, RelatedPoolsParams, UpdateStreamingParams, UpdatePoolResolutionTimeParams, FindPoolFallbackParams, SignOraclesExtendTimeParams, UserTotalInvestmentParams, OptionsTotalVolumeParams, PoolActivityParams, TopHoldersParams, UserInvestedPoolsParams, InvestmentVolumeGraphParams, UserPnlGraphParams, TopWinnersLosersParams, PnlByPoolIdParams, UserPositionsParams, OpenPositionsParams, PriceDataParams, AddReviewParams, GetUserOrdersParams, OrderBookParams, GetUserOrderByPoolIdParams, OrdersListingByPoolParams, AddUserPointsParams, UserOnboardingParams, PointsGraphParams, GetNotificationsParams, MarkNotificationAsReadParams, CreateDisputeMessageParams, GetPoolDisputeConvoParams, FollowToggleParams, FollowCheckParams, FollowListParams, FollowStatsParams, RainBurnPerPoolParams } from './api/types.js';
 import * as usersApi from './api/users.js';
 import * as commentsApi from './api/comments.js';
 import * as poolsApi from './api/pools.js';
@@ -524,6 +524,14 @@ export class Rain {
 
   async calculateUserOpenInterest(accessToken: string) {
     return investmentsApi.calculateUserOpenInterest(this.cfg(accessToken));
+  }
+
+  async getUserPositions(params: UserPositionsParams, accessToken: string) {
+    return investmentsApi.getUserPositions(params, this.cfg(accessToken));
+  }
+
+  async getOpenPositions(params: OpenPositionsParams, accessToken: string) {
+    return investmentsApi.getOpenPositions(params, this.cfg(accessToken));
   }
 
   // ─── Price Data ──────────────────────────────────────────────────────────────

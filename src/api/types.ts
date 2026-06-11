@@ -243,6 +243,15 @@ export interface PnlByPoolIdParams {
   poolId: string;
 }
 
+export interface UserPositionsParams {
+  poolId: string;
+  subPoolIndex: number;
+}
+
+export interface OpenPositionsParams {
+  poolId: string;
+}
+
 // ─── Price Data ───────────────────────────────────────────────────────────────
 
 export interface PriceDataParams {
