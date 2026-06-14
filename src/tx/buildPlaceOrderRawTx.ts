@@ -8,7 +8,7 @@ import { buildApproveRawTx } from "./buildApprovalRawTx.js";
 export async function buildPlaceBuyOrderRawTx(
     params: PlaceBuyOrderTxParams & { walletAddress: `0x${string}`; rpcUrl: string }
 ): Promise<RawTransaction[]> {
-    const { marketContractAddress, option, optionSide, price, amount, walletAddress, rpcUrl } = params;
+    const { marketContractAddress, option, optionSide, price, amount, postOnly = false, walletAddress, rpcUrl } = params;
 
     if (!marketContractAddress) throw new Error("marketContractAddress is required");
     if (option === undefined || option === null) throw new Error("option is required");
@@ -29,7 +29,7 @@ export async function buildPlaceBuyOrderRawTx(
         data: encodeFunctionData({
             abi: MarketsAbi,
             functionName: PLACE_BUY_ORDER,
-            args: [option, optionSide, price, amount],
+            args: [option, optionSide, price, amount, postOnly],
         }),
         value: 0n,
     });
@@ -38,7 +38,7 @@ export async function buildPlaceBuyOrderRawTx(
 }
 
 export function buildPlaceSellOrderRawTx(params: PlaceSellOrderTxParams): RawTransaction {
-    const { marketContractAddress, option, optionSide, price, shares } = params;
+    const { marketContractAddress, option, optionSide, price, shares, postOnly = false } = params;
 
     if (!marketContractAddress) throw new Error("marketContractAddress is required");
     if (option === undefined || option === null) throw new Error("option is required");
@@ -51,7 +51,7 @@ export function buildPlaceSellOrderRawTx(params: PlaceSellOrderTxParams): RawTra
         data: encodeFunctionData({
             abi: MarketsAbi,
             functionName: PLACE_SELL_ORDER,
-            args: [option, optionSide, price, shares],
+            args: [option, optionSide, price, shares, postOnly],
         }),
         value: 0n,
     };

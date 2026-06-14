@@ -366,12 +366,15 @@ const txs = await rain.buildPlaceBuyOrderTx({
   optionSide: OptionSide.Yes,
   price: parseEther('0.5'), // 50% price in 1e18 scale
   amount: parseUnits('10', 6), // 10 USDT
+  postOnly: false, // optional, defaults to false. Set true for maker-only (reverts OrderWouldCross if it would cross the book)
   walletAddress: '0x...', // user's wallet address
 });
 // Returns [approveTx?, placeBuyOrderTx]
 ```
 
 > **Note:** Approval is handled automatically. Available when AMM pool is closed.
+>
+> **`postOnly`:** When `true`, the matching loop is skipped — the order rests directly. If `price` would cross a resting ask the call reverts `OrderWouldCross`, so the caller is never charged taker fees. When `false` (default), behaviour is unchanged: matches the sell book first and rests only the residual.
 
 #### `buildPlaceSellOrderTx(params: PlaceSellOrderTxParams): RawTransaction`
 
@@ -384,10 +387,13 @@ const tx = rain.buildPlaceSellOrderTx({
   optionSide: OptionSide.Yes,
   price: parseEther('0.7'), // 70% price in 1e18 scale
   shares: 5000000n, // shares to sell (from getUserOptionShares)
+  postOnly: false, // optional, defaults to false. Set true for maker-only (reverts OrderWouldCross if it would cross the book)
 });
 ```
 
 > **Note:** No approval needed. Shares are escrowed by the contract.
+>
+> **`postOnly`:** Same semantics as `buildPlaceBuyOrderTx` — `true` rejects orders that would immediately cross the buy book (revert `OrderWouldCross`); `false` matches the buy book first and rests only the residual.
 
 #### `buildCancelBuyOrdersTx(params: CancelBuyOrdersTxParams): RawTransaction`
 

@@ -45,6 +45,7 @@ export interface PlaceBuyOrderTxParams {
     optionSide: OptionSide; // Yes = 1, No = 2
     price: bigint;         // price per share in 1e18 scale (e.g. 0.5 = 500000000000000000n)
     amount: bigint;        // total buy amount in base token wei
+    postOnly?: boolean;    // maker-only placement (reverts OrderWouldCross if it would cross). Defaults to false.
 }
 
 export interface PlaceSellOrderTxParams {
@@ -53,6 +54,7 @@ export interface PlaceSellOrderTxParams {
     optionSide: OptionSide; // Yes = 1, No = 2
     price: bigint;         // price per share in 1e18 scale
     shares: bigint;        // number of shares to sell
+    postOnly?: boolean;    // maker-only placement (reverts OrderWouldCross if it would cross). Defaults to false.
 }
 
 export interface CancelBuyOrdersTxParams {
