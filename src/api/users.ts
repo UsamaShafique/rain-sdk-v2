@@ -73,9 +73,10 @@ export async function viewUserProfile(
 }
 
 export async function checkTokenExpiration(config: ApiConfig): Promise<ApiResponse> {
-  const res = await fetch(`${config.apiUrl}/users/check-token-expiration`, {
+  const qs = buildQuery({ token: config.accessToken });
+  const res = await fetch(`${config.apiUrl}/users/check-token-expiration${qs}`, {
     method: 'GET',
-    headers: buildHeaders(config),
+    headers: buildHeaders({ apiUrl: config.apiUrl }),
   });
   return handleResponse(res);
 }
