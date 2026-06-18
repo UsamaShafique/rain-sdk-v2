@@ -396,3 +396,18 @@ export interface FollowStatsParams {
 export interface RainBurnPerPoolParams {
   poolId: string;
 }
+
+// ─── Bookmarks ────────────────────────────────────────────────────────────────
+
+export interface ToggleBookmarkParams {
+  poolId: string;
+}
+
+export interface GetBookmarksParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface CheckBookmarkParams {
+  poolId: string;
+}

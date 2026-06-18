@@ -1174,6 +1174,19 @@ await rain.createDisputeMessage({
 const convo = await rain.getPoolDisputeConvo({ poolId: '...', subPool: '...', limit: 50, offset: 0 }, accessToken);
 ```
 
+### Bookmarks
+
+```typescript
+// Toggle bookmark (add/remove) for a market
+await rain.toggleBookmark({ poolId: '...' }, accessToken);
+
+// Get user's bookmarked markets (paginated)
+const bookmarks = await rain.getBookmarks({ page: 1, limit: 20 }, accessToken);
+
+// Check if a market is bookmarked
+const status = await rain.checkBookmark({ poolId: '...' }, accessToken);
+```
+
 ### Whitelisted Tokens
 
 ```typescript
