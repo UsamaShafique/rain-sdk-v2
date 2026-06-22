@@ -22,6 +22,7 @@ import { LoginParams, LoginResult } from './auth/types.js';
 import { getUserOptionLPShares } from './markets/getUserOptionLPShares.js';
 import { getUserOptionShares } from './markets/getUserOptionShares.js';
 import { getDynamicPayout } from './markets/getDynamicPayout.js';
+import { getClaimableAmount } from './markets/getClaimableAmount.js';
 import { getUserSharesInEscrow } from './markets/getUserSharesInEscrow.js';
 import { getOptionClaimed } from './markets/getOptionClaimed.js';
 import { getDisputeWindow } from './markets/getDisputeWindow.js';
@@ -194,6 +195,14 @@ export class Rain {
     option: bigint;
   }): Promise<bigint[]> {
     return getDynamicPayout({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async getClaimableAmount(params: {
+    marketContractAddress: `0x${string}`;
+    userAddress: `0x${string}`;
+    option: bigint;
+  }): Promise<bigint> {
+    return getClaimableAmount({ ...params, rpcUrl: this.rpcUrl! });
   }
 
   async buildSplitTx(params: SplitTxParams & { walletAddress: `0x${string}` }): Promise<RawTransaction[]> {

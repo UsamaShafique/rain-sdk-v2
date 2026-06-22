@@ -609,6 +609,19 @@ const result = await rain.getEntryShares({
 // result.expectedReward = expected reward amount
 ```
 
+### `getClaimableAmount(params): Promise<bigint>`
+
+Get the total claimable amount for a user on a specific option.
+
+```typescript
+const claimable = await rain.getClaimableAmount({
+  marketContractAddress: '0x...',
+  userAddress: '0x...',
+  option: 1n, // 1-based option index
+});
+// claimable = total claimable amount in base token wei
+```
+
 ### `getDisputeWindow(params): Promise<bigint>`
 
 Get the dispute window duration (in seconds) for a market contract.
