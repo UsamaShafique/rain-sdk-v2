@@ -1063,6 +1063,9 @@ const positions = await rain.getUserPositions(
 // (one entry per (subPool, side) the user still holds; excludes claimed / losing sides)
 const open = await rain.getOpenPositions({ poolId: '...' }, accessToken);
 
+// Get user's open share positions per side with price move vs avg buy price
+const sharePositions = await rain.getUserSharePositions({ poolId: '...' }, accessToken);
+
 // Search user's invested pools by keyword (matched against question and tags)
 const results = await rain.searchInvestedPools({
   question: 'world cup',       // required — keyword to match

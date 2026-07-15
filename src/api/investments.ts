@@ -2,7 +2,7 @@ import {
   ApiConfig, ApiResponse, UserTotalInvestmentParams, OptionsTotalVolumeParams,
   PoolActivityParams, TopHoldersParams, UserInvestedPoolsParams,
   InvestmentVolumeGraphParams, UserPnlGraphParams, TopWinnersLosersParams, PnlByPoolIdParams,
-  UserPositionsParams, OpenPositionsParams, SearchInvestedPoolsParams,
+  UserPositionsParams, OpenPositionsParams, UserSharePositionsParams, SearchInvestedPoolsParams,
 } from './types.js';
 import { buildHeaders, buildQuery, handleResponse } from './helpers.js';
 
@@ -202,6 +202,17 @@ export async function getOpenPositions(
   config: ApiConfig
 ): Promise<ApiResponse> {
   const res = await fetch(`${config.apiUrl}/investments/${encodeURIComponent(params.poolId)}/open-positions`, {
+    method: 'GET',
+    headers: buildHeaders(config),
+  });
+  return handleResponse(res);
+}
+
+export async function getUserSharePositions(
+  params: UserSharePositionsParams,
+  config: ApiConfig
+): Promise<ApiResponse> {
+  const res = await fetch(`${config.apiUrl}/investments/${encodeURIComponent(params.poolId)}/user-share-positions`, {
     method: 'GET',
     headers: buildHeaders(config),
   });

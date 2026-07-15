@@ -252,6 +252,10 @@ export interface OpenPositionsParams {
   poolId: string;
 }
 
+export interface UserSharePositionsParams {
+  poolId: string;
+}
+
 export interface SearchInvestedPoolsParams {
   question: string;
   status?: 'all' | 'active' | 'closed' | 'New' | 'Live' | 'Waiting_for_Result' | 'Under_Dispute' | 'Under_Appeal' | 'Closed' | 'Closing_Soon' | 'Pending_Finalization' | 'Dispute_Window_Open' | 'Appeal_Window_Open';
