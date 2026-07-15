@@ -252,6 +252,13 @@ export interface OpenPositionsParams {
   poolId: string;
 }
 
+export interface SearchInvestedPoolsParams {
+  question: string;
+  status?: 'all' | 'active' | 'closed' | 'New' | 'Live' | 'Waiting_for_Result' | 'Under_Dispute' | 'Under_Appeal' | 'Closed' | 'Closing_Soon' | 'Pending_Finalization' | 'Dispute_Window_Open' | 'Appeal_Window_Open';
+  sortBy?: 'value' | 'recent';
+  limit?: number;
+}
+
 // ─── Price Data ───────────────────────────────────────────────────────────────
 
 export interface PriceDataParams {

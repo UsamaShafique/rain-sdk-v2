@@ -622,6 +622,21 @@ const claimable = await rain.getClaimableAmount({
 // claimable = total claimable amount in base token wei
 ```
 
+### `getSellProceeds(params): Promise<{ proceeds: bigint; sharesSold: bigint }>`
+
+Get the expected proceeds and shares sold for selling shares of an option.
+
+```typescript
+const result = await rain.getSellProceeds({
+  marketContractAddress: '0x...',
+  option: 1n,       // 1-based option index
+  optionSide: 1,    // 1 = Yes, 2 = No
+  shares: 1000000n, // shares to sell (raw amount)
+});
+// result.proceeds = base token amount you'd receive
+// result.sharesSold = shares that would actually be sold
+```
+
 ### `getDisputeWindow(params): Promise<bigint>`
 
 Get the dispute window duration (in seconds) for a market contract.
@@ -1047,6 +1062,14 @@ const positions = await rain.getUserPositions(
 // Get the authenticated user's open positions across all subPools of a pool
 // (one entry per (subPool, side) the user still holds; excludes claimed / losing sides)
 const open = await rain.getOpenPositions({ poolId: '...' }, accessToken);
+
+// Search user's invested pools by keyword (matched against question and tags)
+const results = await rain.searchInvestedPools({
+  question: 'world cup',       // required — keyword to match
+  status: 'active',            // optional — 'all' | 'active' | 'closed' | granular status
+  sortBy: 'value',             // optional — 'value' (net amount) | 'recent' (creation time)
+  limit: 10,                   // optional — max results (default 10)
+}, accessToken);
 ```
 
 ### Orders
