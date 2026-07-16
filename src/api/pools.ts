@@ -3,6 +3,7 @@ import {
   PoolListingByCreatorParams, VerifyAccessCodeParams, PoolTotalParticipantsParams,
   SearchPoolParams, RelatedPoolsParams, UpdateStreamingParams,
   UpdatePoolResolutionTimeParams, FindPoolFallbackParams, SignOraclesExtendTimeParams,
+  TrendingTagsParams,
 } from './types.js';
 import { buildHeaders, buildQuery, handleResponse } from './helpers.js';
 
@@ -213,6 +214,18 @@ export async function findPoolFallback(
     method: 'POST',
     headers: buildHeaders(config, 'application/json'),
     body: JSON.stringify(params),
+  });
+  return handleResponse(res);
+}
+
+export async function getTrendingTags(
+  params: TrendingTagsParams,
+  config: ApiConfig
+): Promise<ApiResponse> {
+  const qs = buildQuery({ limit: params.limit });
+  const res = await fetch(`${config.apiUrl}/pools/trending-tags${qs}`, {
+    method: 'GET',
+    headers: buildHeaders(config),
   });
   return handleResponse(res);
 }

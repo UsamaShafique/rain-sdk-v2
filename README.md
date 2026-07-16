@@ -952,6 +952,9 @@ const pool = await rain.getPoolByContractAddress({ contractAddress: '0x...' });
 // Search pools
 const results = await rain.searchPool({ query: 'bitcoin', limit: 10, offset: 0 });
 
+// Get trending tags (ranked by market activity in last 24h)
+const tags = await rain.getTrendingTags({ limit: 10 });
+
 // Get featured pools
 const featured = await rain.getFeaturedPools({ limit: 10, offset: 0 });
 

@@ -167,6 +167,10 @@ export interface SearchPoolParams {
   question: string;
 }
 
+export interface TrendingTagsParams {
+  limit?: number;
+}
+
 export interface RelatedPoolsParams {
   poolId: string;
   limit?: number;
