@@ -1237,6 +1237,64 @@ const priceData = await rain.getTokenPrice('0x...'); // token contract address
 // priceData.data = { price: 0.05 } — USD price per token
 ```
 
+### Leaderboard
+
+Public endpoints — no access token required. Boards are served from a materialized document rebuilt by a cron (~20 min), so changes appear after the next tick rather than on the next request.
+
+```typescript
+// Get a ranked leaderboard — one board per (board, window, category)
+const board = await rain.getLeaderboard({
+  board: 'profit',        // 'profit' (net realized PnL) or 'correct_calls' (sum of 1 − entryPrice over winning positions)
+  window: 'all_time',     // 'all_time' (default) or 'monthly' (current UTC calendar month)
+  category: 'Crypto',     // optional, case-insensitive; omit for the global board
+  limit: 10,              // up to the stored cap of 100 (default 10)
+});
+// board.data = { board, window, category, categoryLabel, period, limit, totalRanked, priceBasis, entries, lastUpdatedAt }
+// Each entry carries all four table columns — profit, correctCalls, winRate, trades —
+// whichever board is sorting, so switching the sorted column needs no second request.
+
+// Search traders on a board — the leaderboard's trader search box
+const found = await rain.searchLeaderboard({
+  q: '0x742d',            // wallet address, address fragment (with/without 0x, prefix/middle/tail), or user id
+  board: 'profit',        // required — searches the stored board for this (board, window, category)
+  window: 'all_time',     // optional, default 'all_time'
+  category: 'Crypto',     // optional; omit for the global board
+  limit: 10,              // up to 50 (default 10)
+});
+// found.data = { board, window, category, period, query, matched, searchedTop, totalRanked, lastUpdatedAt, results }
+// `results` are the same entry objects getLeaderboard returns, in rank order.
+// Scoped to the stored board — a trader outside the top N is simply not found.
+// Empty `results` means "not on this board"; `searchedTop` + `totalRanked` let you
+// say "not in the top 100" precisely. Queries under 2 characters return empty, not a 400.
+
+// Get a trader's most recent trades — the rows inside an expanded leaderboard row
+const recent = await rain.getTraderRecentTrades({
+  userId: '...',          // from a leaderboard entry's `userId`
+  limit: 5,               // rendered rows (a multi-side trade flattens into more lines), up to 25 (default 5)
+});
+// recent.data = { userId, limit, trades }
+// Each trade: { action ('Buy'|'Sell'), origin, transactionHash, tradedAt, poolId, question,
+//               poolImage, subPoolId, subQuestion, side (1=YES, 2=NO), optionName, shares,
+//               amountUSD, pricePerShare, priceCents, status ('open'|'pending'|'settled'),
+//               pnlScope, pnlUSD }
+// Directional trades only (origin ∈ {enter, orderFill}), newest first — and unlike the
+// track-record endpoint, OPEN positions are included (status 'open').
+// `pnlUSD` is POSITION-level, not per-fill: several trades in the same market report the
+// same number. Null until settled; `amountUSD`/`pnlUSD` are dollars × 1e6.
+
+// Get categories that currently have a ranked board (feeds the category filter)
+const categories = await rain.getLeaderboardCategories();
+// categories.data = [{ category: 'CRYPTO', label: 'Crypto' }, ...]
+// Pass `category` back as the `category` param of getLeaderboard.
+```
+
+**Notes:**
+- **Units:** every `*USD` number (including `profit` and `score` on the profit board) is **dollars × 1e6** — divide by 1,000,000 to display. E.g. `profit: 887505347` is **$887.51**.
+- **Monthly window** buckets on when PnL *settled*, not when the position was opened; `window: 'monthly'` always means the current UTC month (`period` reports it as `YYYY-MM`).
+- **Only positive scores are ranked.** An unknown `category` returns an empty board, not a 400.
+- **Top-N only** — there is no rank-of-user lookup. Empty `entries` with `lastUpdatedAt: null` means the cron hasn't built the board yet; empty with a timestamp means nobody qualifies.
+- The client can highlight the viewer's own row by matching `userId` in `entries`.
+
 ---
 
 ## WebSocket Events (Socket.IO)

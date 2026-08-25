@@ -30,7 +30,7 @@ import { getDisputeWindow } from './markets/getDisputeWindow.js';
 import { getEntryShares, EntrySharesResult } from './markets/getEntryShares.js';
 import { createPublicClient, http, parseAbi } from 'viem';
 import { arbitrum } from 'viem/chains';
-import type { ApiConfig, UserProfileUpdateParams, UserHistoryParams, CreateCommentParams, CommentsListingParams, UpdateCommentParams, CommentCountParams, PublicPoolsParams, PrivatePoolsParams, PoolListingByCreatorParams, VerifyAccessCodeParams, PoolTotalParticipantsParams, SearchPoolParams, RelatedPoolsParams, UpdateStreamingParams, UpdatePoolResolutionTimeParams, FindPoolFallbackParams, SignOraclesExtendTimeParams, TrendingTagsParams, UserTotalInvestmentParams, OptionsTotalVolumeParams, PoolActivityParams, TopHoldersParams, UserInvestedPoolsParams, InvestmentVolumeGraphParams, UserPnlGraphParams, TopWinnersLosersParams, PnlByPoolIdParams, UserPositionsParams, OpenPositionsParams, UserSharePositionsParams, SearchInvestedPoolsParams, PriceDataParams, AddReviewParams, GetUserOrdersParams, OrderBookParams, GetUserOrderByPoolIdParams, OrdersListingByPoolParams, AddUserPointsParams, UserOnboardingParams, PointsGraphParams, GetNotificationsParams, MarkNotificationAsReadParams, CreateDisputeMessageParams, GetPoolDisputeConvoParams, FollowToggleParams, FollowCheckParams, FollowListParams, FollowStatsParams, RainBurnPerPoolParams, ToggleBookmarkParams, GetBookmarksParams, CheckBookmarkParams } from './api/types.js';
+import type { ApiConfig, UserProfileUpdateParams, UserHistoryParams, CreateCommentParams, CommentsListingParams, UpdateCommentParams, CommentCountParams, PublicPoolsParams, PrivatePoolsParams, PoolListingByCreatorParams, VerifyAccessCodeParams, PoolTotalParticipantsParams, SearchPoolParams, RelatedPoolsParams, UpdateStreamingParams, UpdatePoolResolutionTimeParams, FindPoolFallbackParams, SignOraclesExtendTimeParams, TrendingTagsParams, UserTotalInvestmentParams, OptionsTotalVolumeParams, PoolActivityParams, TopHoldersParams, UserInvestedPoolsParams, InvestmentVolumeGraphParams, UserPnlGraphParams, TopWinnersLosersParams, PnlByPoolIdParams, UserPositionsParams, OpenPositionsParams, UserSharePositionsParams, SearchInvestedPoolsParams, PriceDataParams, AddReviewParams, GetUserOrdersParams, OrderBookParams, GetUserOrderByPoolIdParams, OrdersListingByPoolParams, AddUserPointsParams, UserOnboardingParams, PointsGraphParams, GetNotificationsParams, MarkNotificationAsReadParams, CreateDisputeMessageParams, GetPoolDisputeConvoParams, FollowToggleParams, FollowCheckParams, FollowListParams, FollowStatsParams, RainBurnPerPoolParams, ToggleBookmarkParams, GetBookmarksParams, CheckBookmarkParams, LeaderboardParams, LeaderboardSearchParams, TraderRecentTradesParams } from './api/types.js';
 import * as usersApi from './api/users.js';
 import * as commentsApi from './api/comments.js';
 import * as poolsApi from './api/pools.js';
@@ -45,6 +45,7 @@ import * as disputeApi from './api/dispute.js';
 import * as followApi from './api/follow.js';
 import * as whitelistedTokensApi from './api/whitelistedTokens.js';
 import * as bookmarksApi from './api/bookmarks.js';
+import * as leaderboardApi from './api/leaderboard.js';
 
 const erc20AllowanceAbi = parseAbi(['function allowance(address owner, address spender) view returns (uint256)']);
 const factoryViewAbi = parseAbi([
@@ -700,5 +701,23 @@ export class Rain {
 
   async checkBookmark(params: CheckBookmarkParams, accessToken: string) {
     return bookmarksApi.checkBookmark(params, this.cfg(accessToken));
+  }
+
+  // ─── Leaderboard ────────────────────────────────────────────────────────────
+
+  async getLeaderboard(params: LeaderboardParams) {
+    return leaderboardApi.getLeaderboard(params, this.cfg());
+  }
+
+  async searchLeaderboard(params: LeaderboardSearchParams) {
+    return leaderboardApi.searchLeaderboard(params, this.cfg());
+  }
+
+  async getTraderRecentTrades(params: TraderRecentTradesParams) {
+    return leaderboardApi.getTraderRecentTrades(params, this.cfg());
+  }
+
+  async getLeaderboardCategories() {
+    return leaderboardApi.getLeaderboardCategories(this.cfg());
   }
 }

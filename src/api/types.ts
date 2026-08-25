@@ -426,3 +426,153 @@ export interface GetBookmarksParams {
 export interface CheckBookmarkParams {
   poolId: string;
 }
+
+// ─── Leaderboard ──────────────────────────────────────────────────────────────
+
+export type LeaderboardBoard = 'profit' | 'correct_calls';
+export type LeaderboardWindow = 'all_time' | 'monthly';
+
+export interface LeaderboardParams {
+  /** Ranking to serve: net realized PnL, or the weighted correct-calls score. */
+  board: LeaderboardBoard;
+  /** `all_time` (default) or the current UTC calendar month. */
+  window?: LeaderboardWindow;
+  /** Market category (case-insensitive). Omit for the global board. Unknown categories return an empty board. */
+  category?: string;
+  /** Entries to return, up to the stored cap of 100. Default 10. */
+  limit?: number;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  userId: string;
+  walletAddress: string | null;
+  eoaWalletAddress: string | null;
+  /** The ranking key. On `profit`, dollars × 1e6 (divide by 1,000,000 to display); on `correct_calls`, an unscaled weight. */
+  score: number;
+  positions: number;
+  /** Net realized PnL in dollars × 1e6. Present on both boards. */
+  profit: number;
+  /** Sum of `1 − entryPrice` over winning positions — a weight, not a count. Present on both boards. */
+  correctCalls: number;
+  /** Resolved directional positions — the denominator of `winRate`. */
+  trades: number;
+  wins: number;
+  /** `wins / trades`, a fraction in [0,1]. */
+  winRate: number;
+  badge: 'none' | 'blue' | 'gold';
+  /** Crowns held on this board and category — the row's crown indicator. */
+  categoryCrowns: number;
+  /** Newest crowned month in this bucket, `YYYY-MM` (UTC), or null. */
+  lastCrownPeriod: string | null;
+  /** Crowns held across all boards and categories. */
+  crownCount: number;
+  marketScore: number;
+  costScore: number;
+}
+
+export interface LeaderboardData {
+  board: LeaderboardBoard;
+  window: LeaderboardWindow;
+  /** Upper-cased matched key, or null for the global board. */
+  category: string | null;
+  /** Display spelling of the matched category, or null. */
+  categoryLabel: string | null;
+  /** `YYYY-MM` (UTC) on the monthly window; null on all-time. */
+  period: string | null;
+  limit: number;
+  /** Users ranked in total (before the stored cap). */
+  totalRanked: number;
+  /** Entry-price basis the correct-calls board was ranked on: `market` or `cost`. */
+  priceBasis: 'market' | 'cost';
+  entries: LeaderboardEntry[];
+  /** When the cron last rebuilt this board; null means never. */
+  lastUpdatedAt: string | null;
+}
+
+export interface LeaderboardCategory {
+  /** Upper-cased key — pass this back as `category`. */
+  category: string;
+  /** First-seen spelling, for display. */
+  label: string;
+}
+
+export interface LeaderboardSearchParams {
+  /** Wallet address, address fragment (with or without 0x, prefix/middle/tail), or user id. Case-insensitive substring match. */
+  q: string;
+  /** Board to search: `profit` or `correct_calls`. */
+  board: LeaderboardBoard;
+  /** `all_time` (default) or the current UTC calendar month. */
+  window?: LeaderboardWindow;
+  /** Market category (case-insensitive). Omit for the global board. */
+  category?: string;
+  /** Results to return, up to 50. Default 10. */
+  limit?: number;
+}
+
+export interface TraderRecentTradesParams {
+  /** The trader's user id, as returned in leaderboard entries. */
+  userId: string;
+  /** Rendered rows to return (a trade carrying more than one side flattens into more than one line), up to 25. Default 5. */
+  limit?: number;
+}
+
+export interface TraderRecentTrade {
+  /** Rendered form of `transactionType`: `Buy` or `Sell`. */
+  action: 'Buy' | 'Sell';
+  transactionType: string;
+  origin: 'enter' | 'orderFill';
+  transactionHash: string;
+  tradedAt: string;
+  poolId: string;
+  question: string | null;
+  poolImage: string | null;
+  subPoolId: string | null;
+  /** The sub-market — e.g. "Match winner". */
+  subQuestion: string | null;
+  /** 1 = YES, 2 = NO */
+  side: number;
+  optionName: string;
+  shares: number;
+  /** Collateral paid, in dollars × 1e6 (divide by 1,000,000 to display). */
+  amountUSD: number;
+  /** Collateral paid per share, in (0,1). Null when the recorded ratio is not a price (e.g. a 1:1 AMM entry). */
+  pricePerShare: number | null;
+  /** `pricePerShare` in cents, for the "9c" label. */
+  priceCents: number | null;
+  /** `open` = market not resolved; `pending` = won but unclaimed (no PnL yet, never booked as a loss); `settled` = realized. */
+  status: 'open' | 'pending' | 'settled';
+  /** Always `position` — PnL is per (pool, subPool), not per fill. */
+  pnlScope: string;
+  /** Realized PnL of the POSITION this trade belongs to, in dollars × 1e6. Null until settled. */
+  pnlUSD: number | null;
+  /** Resolved-but-unclaimed winnings of the position, in dollars × 1e6. */
+  pendingUSD?: number;
+  /** Whether the position won, once resolved. */
+  won?: boolean;
+}
+
+export interface TraderRecentTradesData {
+  userId: string;
+  limit: number;
+  /** Most recent directional trades, newest first. */
+  trades: TraderRecentTrade[];
+}
+
+export interface LeaderboardSearchData {
+  board: LeaderboardBoard;
+  window: LeaderboardWindow;
+  category: string | null;
+  /** `YYYY-MM` (UTC) on the monthly window; null on all-time. */
+  period: string | null;
+  query: string;
+  /** Board entries the term matched, before `limit`. */
+  matched: number;
+  /** Board rows searched — the stored depth. With `matched: 0`, lets a client say "not in the top N" rather than "no such trader". */
+  searchedTop: number;
+  /** Users ranked on this board in total. */
+  totalRanked: number;
+  lastUpdatedAt: string | null;
+  /** Matching board entries — the same objects `getLeaderboard` returns, in rank order. */
+  results: LeaderboardEntry[];
+}
