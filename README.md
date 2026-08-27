@@ -32,12 +32,17 @@ const config = rain.getEnvironmentConfig();
 console.log(config.market_factory_address); // Factory contract
 console.log(config.tokens.usdt.address);    // USDT token address
 console.log(config.tokens.rain.address);    // RAIN token address
+console.log(config.tokens.usdr.address);    // USDR token address
 console.log(config.tokens.usdt.decimals);   // 6
 console.log(config.tokens.rain.decimals);   // 18
+console.log(config.tokens.usdr.decimals);   // 18
 
 // Get token config by address
 const tokenInfo = rain.getTokenConfig('0x...');
 console.log(tokenInfo?.decimals, tokenInfo?.symbol);
+
+// USDR token ABI (ERC20 + AccessControl + EIP-2612 permit, role-gated mint/burn)
+import { USDRAbi } from 'rain-sdk-v2';
 ```
 
 ---

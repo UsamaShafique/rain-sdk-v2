@@ -38,6 +38,12 @@ export const ENV_CONFIG = {
                 decimals: 18,
                 oracle_fixed_fee_per_option: 1_000_000_000_000_000_000n, // $1 in 18 decimals
             } as TokenConfig,
+            usdr: {
+                address: "0xC1aeb1D39008337E127698c10f6338E93E5f3369" as `0x${string}`,
+                symbol: "USDR",
+                decimals: 18,
+                oracle_fixed_fee_per_option: 1_000_000_000_000_000_000n, // $1 in 18 decimals
+            } as TokenConfig,
         },
     },
 
@@ -58,6 +64,12 @@ export const ENV_CONFIG = {
                 decimals: 18,
                 oracle_fixed_fee_per_option: 1_000_000_000_000_000_000n,
             } as TokenConfig,
+            usdr: {
+                address: "0xC1aeb1D39008337E127698c10f6338E93E5f3369" as `0x${string}`,
+                symbol: "USDR",
+                decimals: 18,
+                oracle_fixed_fee_per_option: 1_000_000_000_000_000_000n,
+            } as TokenConfig,
         },
     },
 
@@ -75,6 +87,12 @@ export const ENV_CONFIG = {
             rain: {
                 address: "0x25118290e6A5f4139381D072181157035864099d" as `0x${string}`,
                 symbol: "RAIN",
+                decimals: 18,
+                oracle_fixed_fee_per_option: 1_000_000_000_000_000_000n,
+            } as TokenConfig,
+            usdr: {
+                address: "0xC1aeb1D39008337E127698c10f6338E93E5f3369" as `0x${string}`,
+                symbol: "USDR",
                 decimals: 18,
                 oracle_fixed_fee_per_option: 1_000_000_000_000_000_000n,
             } as TokenConfig,
