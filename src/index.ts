@@ -8,6 +8,7 @@ export { signLoginMessage } from './auth/signMessage.js';
 export type { ExtendTimeTxParams } from './tx/buildExtendTimeRawTx.js';
 export type { CalculateWinnerTxParams } from './tx/buildCalculateWinnerRawTx.js';
 export type { TokenConfig } from './config/environments.js';
+export type { OptionDisputeInfo, OptionAppealInfo } from './markets/getDisputeState.js';
 export * from './api/index.js';
 export { RainSocket } from './socket/RainSocket.js';
 export type { RainSocketEvent, EnterOptionEventData, ExitOptionEventData, LiquidityEventData, SplitEventData, MergeEventData, RemoveLiquidityEventData, SyncPriceEventData, OrderCreatedEventData, OrderCancelledEventData, OrderFilledEventData, PoolClosedEventData, PoolEventData, WinnerEventData, DisputeOpenedEventData, OracleCreatedEventData, AppealOpenedEventData, DisputeWinnerEventData, AppealWinnerEventData, ClaimRewardEventData, DisputeRefundEventData } from './socket/RainSocket.js';

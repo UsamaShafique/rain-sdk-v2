@@ -661,6 +661,96 @@ const payouts = await rain.getDynamicPayout({
 // payouts = [yesPayoutWei, noPayoutWei]
 ```
 
+### `getResolverBondAmount(params): Promise<bigint>`
+
+Get the bond amount (in base-token wei) a resolver must post to propose a resolution for an option.
+
+```typescript
+const bond = await rain.getResolverBondAmount({
+  marketContractAddress: '0x...',
+  option: 1n, // 1-based option index
+});
+```
+
+### `getDisputeAppealFee(params): Promise<bigint>`
+
+Get the fee (in base-token wei) required to open a dispute or appeal on an option.
+
+```typescript
+const fee = await rain.getDisputeAppealFee({
+  marketContractAddress: '0x...',
+  option: 1n,
+});
+```
+
+### `optionResolverBond(params): Promise<bigint>`
+
+Get the resolver bond currently posted on an option (0n if no resolution has been proposed).
+
+```typescript
+const bond = await rain.optionResolverBond({
+  marketContractAddress: '0x...',
+  option: 1n,
+});
+```
+
+### `optionResolutionProposer(params): Promise<`0x${string}`>`
+
+Get the address that proposed the resolution for an option (zero address if none).
+
+```typescript
+const proposer = await rain.optionResolutionProposer({
+  marketContractAddress: '0x...',
+  option: 1n,
+});
+```
+
+### `isOptionDisputed(params): Promise<boolean>`
+
+Check whether an option's resolution has been disputed.
+
+```typescript
+const disputed = await rain.isOptionDisputed({
+  marketContractAddress: '0x...',
+  option: 1n,
+});
+```
+
+### `isOptionAppealed(params): Promise<boolean>`
+
+Check whether an option's dispute resolution has been appealed.
+
+```typescript
+const appealed = await rain.isOptionAppealed({
+  marketContractAddress: '0x...',
+  option: 1n,
+});
+```
+
+### `optionDispute(params): Promise<OptionDisputeInfo>`
+
+Get the dispute details for an option: fee paid, the winner claimed by the disputer, the disputer address, and the dispute resolver.
+
+```typescript
+const dispute = await rain.optionDispute({
+  marketContractAddress: '0x...',
+  option: 1n,
+});
+// { disputeFee: bigint, disputedWinner: bigint, disputer: '0x...', disputeResolver: '0x...' }
+```
+
+### `optionAppeal(params): Promise<OptionAppealInfo>`
+
+Get the appeal details for an option: fee paid, the winner claimed by the appellant, the disputer address, and the appeal resolver.
+
+```typescript
+const appeal = await rain.optionAppeal({
+  marketContractAddress: '0x...',
+  option: 1n,
+});
+// { disputeFee: bigint, disputedWinner: bigint, disputer: '0x...', appealResolver: '0x...' }
+```
+
 ### `getUserActiveBuyOrders(params): Promise<bigint>`
 
 Get count of user's active buy orders.

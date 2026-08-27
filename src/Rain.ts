@@ -27,6 +27,9 @@ import { getSellProceeds, SellProceedsResult } from './markets/getSellProceeds.j
 import { getUserSharesInEscrow } from './markets/getUserSharesInEscrow.js';
 import { getOptionClaimed } from './markets/getOptionClaimed.js';
 import { getDisputeWindow } from './markets/getDisputeWindow.js';
+import { getResolverBondAmount } from './markets/getResolverBondAmount.js';
+import { getDisputeAppealFee } from './markets/getDisputeFee.js';
+import { optionResolverBond, optionResolutionProposer, isOptionDisputed, isOptionAppealed, optionDispute, optionAppeal, OptionDisputeInfo, OptionAppealInfo } from './markets/getDisputeState.js';
 import { getEntryShares, EntrySharesResult } from './markets/getEntryShares.js';
 import { createPublicClient, http, parseAbi } from 'viem';
 import { arbitrum } from 'viem/chains';
@@ -180,6 +183,62 @@ export class Rain {
     marketContractAddress: `0x${string}`;
   }): Promise<bigint> {
     return getDisputeWindow({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async getResolverBondAmount(params: {
+    marketContractAddress: `0x${string}`;
+    option: bigint;
+  }): Promise<bigint> {
+    return getResolverBondAmount({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async getDisputeAppealFee(params: {
+    marketContractAddress: `0x${string}`;
+    option: bigint;
+  }): Promise<bigint> {
+    return getDisputeAppealFee({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async optionResolverBond(params: {
+    marketContractAddress: `0x${string}`;
+    option: bigint;
+  }): Promise<bigint> {
+    return optionResolverBond({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async optionResolutionProposer(params: {
+    marketContractAddress: `0x${string}`;
+    option: bigint;
+  }): Promise<`0x${string}`> {
+    return optionResolutionProposer({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async isOptionDisputed(params: {
+    marketContractAddress: `0x${string}`;
+    option: bigint;
+  }): Promise<boolean> {
+    return isOptionDisputed({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async isOptionAppealed(params: {
+    marketContractAddress: `0x${string}`;
+    option: bigint;
+  }): Promise<boolean> {
+    return isOptionAppealed({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async optionDispute(params: {
+    marketContractAddress: `0x${string}`;
+    option: bigint;
+  }): Promise<OptionDisputeInfo> {
+    return optionDispute({ ...params, rpcUrl: this.rpcUrl! });
+  }
+
+  async optionAppeal(params: {
+    marketContractAddress: `0x${string}`;
+    option: bigint;
+  }): Promise<OptionAppealInfo> {
+    return optionAppeal({ ...params, rpcUrl: this.rpcUrl! });
   }
 
   async getEntryShares(params: {
