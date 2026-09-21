@@ -71,6 +71,8 @@ const rain = new Rain(config?: RainCoreConfig);
 
 Stateful class for smart account (Account Abstraction) management with Alchemy gas sponsorship.
 
+> ⚠️ **Browser-only.** `RainAA` persists session keys in `indexedDB`, so it is **not supported in Node.js or SSR** — session methods throw a descriptive error in those environments. For server-side flows use the stateless `Rain` class (transaction building and on-chain reads), which runs anywhere.
+
 #### Constructor
 
 ```typescript
@@ -213,7 +215,7 @@ const txs = await rain.buildEnterOptionTx({
   buyAmountInWei: parseUnits('5', 6), // 5 USDT (or parseUnits('5', 18) for RAIN)
   walletAddress: '0x...', // user's wallet address
   slippageTolerance: 5n, // optional, default 5% — percentage tolerance for minSharesOut
-  deadline: 600n, // optional, default 600 (10 min) — duration in seconds
+  deadline: BigInt(Math.floor(Date.now() / 1000) + 600), // optional — absolute unix timestamp; omit for a default 10-min window
 });
 // Returns [approveTx?, enterOptionTx]
 ```
@@ -227,7 +229,7 @@ const txs = await rain.buildEnterOptionTx({
 | `walletAddress` | `0x${string}` | User's wallet address (for allowance check) |
 | `minSharesOut` | `bigint` | *(Optional)* Minimum shares to receive. Auto-calculated from `getEntryShares` with slippage if not set |
 | `slippageTolerance` | `bigint` | *(Optional)* Slippage percentage (e.g. `5n` = 5%). Default: 5% |
-| `deadline` | `bigint` | *(Optional)* Duration in seconds (e.g. `600n` = 10 min). Default: 600 |
+| `deadline` | `bigint` | *(Optional)* Absolute unix timestamp in seconds, e.g. `BigInt(Math.floor(Date.now()/1000) + 600)`. Omit for a default 10-min window. A small duration like `600n` is **rejected** (`RainValidationError`). |
 
 > **Note:** Approval is handled automatically. The SDK reads `baseToken` from the market contract and checks allowance before building transactions. Slippage protection is auto-calculated: the SDK calls `getEntryShares` on-chain to get expected shares, then applies the slippage tolerance.
 
@@ -244,7 +246,7 @@ const tx = await rain.buildSellOptionTx({
   optionSide: OptionSide.Yes, // Yes = 1, No = 2
   sharesAmount: parseUnits('10', 6), // shares to sell
   slippageTolerance: 5n, // optional, default 5%
-  deadline: 600n, // optional, default 600 (10 min) — duration in seconds
+  deadline: BigInt(Math.floor(Date.now() / 1000) + 600), // optional — absolute unix timestamp; omit for a default 10-min window
 });
 // Returns a single RawTransaction (no approval needed)
 ```
@@ -257,7 +259,7 @@ const tx = await rain.buildSellOptionTx({
 | `sharesAmount` | `bigint` | Number of shares to sell |
 | `minAmountOut` | `bigint` | *(Optional)* Minimum base tokens to receive. Auto-calculated from `getCurrentPrice` with slippage if not set |
 | `slippageTolerance` | `bigint` | *(Optional)* Slippage percentage (e.g. `5n` = 5%). Default: 5% |
-| `deadline` | `bigint` | *(Optional)* Duration in seconds (e.g. `600n` = 10 min). Default: 600 |
+| `deadline` | `bigint` | *(Optional)* Absolute unix timestamp in seconds, e.g. `BigInt(Math.floor(Date.now()/1000) + 600)`. Omit for a default 10-min window. A small duration like `600n` is **rejected** (`RainValidationError`). |
 
 ---
 
@@ -308,7 +310,7 @@ const txs = await rain.buildAddLiquidityTx({
   totalAmountInWei: parseUnits('10', 6), // 10 USDT
   walletAddress: '0x...', // user's wallet address
   slippageTolerance: 5n, // optional, default 5%
-  deadline: 600n, // optional, default 600 (10 min) — duration in seconds
+  deadline: BigInt(Math.floor(Date.now() / 1000) + 600), // optional — absolute unix timestamp; omit for a default 10-min window
 });
 // Returns [approveTx?, addLiquidityTx]
 ```
@@ -322,7 +324,7 @@ const txs = await rain.buildAddLiquidityTx({
 | `minYesToDeposit` | `bigint` | *(Optional)* Min yes tokens to deposit. Auto-calculated from reserves if not set |
 | `minNoToDeposit` | `bigint` | *(Optional)* Min no tokens to deposit. Auto-calculated from reserves if not set |
 | `slippageTolerance` | `bigint` | *(Optional)* Slippage percentage (e.g. `5n` = 5%). Default: 5% |
-| `deadline` | `bigint` | *(Optional)* Duration in seconds (e.g. `600n` = 10 min). Default: 600 |
+| `deadline` | `bigint` | *(Optional)* Absolute unix timestamp in seconds, e.g. `BigInt(Math.floor(Date.now()/1000) + 600)`. Omit for a default 10-min window. A small duration like `600n` is **rejected** (`RainValidationError`). |
 
 > **Note:** Approval is handled automatically. Slippage protection is auto-calculated from `ammYesReserve`/`ammNoReserve` proportionally.
 
@@ -342,7 +344,7 @@ const tx = await rain.buildRemoveLiquidityTx({
   option: 1n,
   lpShares, // raw LP shares amount
   slippageTolerance: 5n, // optional, default 5%
-  deadline: 600n, // optional, default 600 (10 min) — duration in seconds
+  deadline: BigInt(Math.floor(Date.now() / 1000) + 600), // optional — absolute unix timestamp; omit for a default 10-min window
 });
 ```
 
@@ -354,7 +356,7 @@ const tx = await rain.buildRemoveLiquidityTx({
 | `minYesOut` | `bigint` | *(Optional)* Min yes tokens to receive. Auto-calculated from `getRemovedLiquidity` if not set |
 | `minNoOut` | `bigint` | *(Optional)* Min no tokens to receive. Auto-calculated if not set |
 | `slippageTolerance` | `bigint` | *(Optional)* Slippage percentage (e.g. `5n` = 5%). Default: 5% |
-| `deadline` | `bigint` | *(Optional)* Duration in seconds (e.g. `600n` = 10 min). Default: 600 |
+| `deadline` | `bigint` | *(Optional)* Absolute unix timestamp in seconds, e.g. `BigInt(Math.floor(Date.now()/1000) + 600)`. Omit for a default 10-min window. A small duration like `600n` is **rejected** (`RainValidationError`). |
 
 ---
 

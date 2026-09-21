@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Build (tsc)
+        run: npm run build
+      - name: Unit tests
+        run: npm test
+      # Integration test hits a public Arbitrum RPC; kept non-blocking so RPC
+      # flakiness never fails the pipeline. Remove `continue-on-error` (or point
+      # RPC_URL at an anvil fork) to make it a hard gate.
+      - name: Integration test (Arbitrum)
+        run: npm run test:integration
+        continue-on-error: true

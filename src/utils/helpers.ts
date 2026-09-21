@@ -1,36 +1,43 @@
-import { ethers, JsonRpcProvider, Contract } from "ethers";
+import { parseUnits, createPublicClient, http, type Abi, type Address } from "viem";
+import { arbitrum } from "viem/chains";
 import { CreateMarketTxParams } from "../tx/types.js";
 import { ERC20Abi } from "../abi/ERC20Abi.js";
 import { getMarketBaseToken } from "../markets/getResolverBondAmount.js";
+
+const erc20Abi = ERC20Abi as Abi;
 
 export const convertToWeiEthers = (
     value: string | bigint,
     decimals: number
 ): bigint => {
-    return ethers.parseUnits(value.toString(), decimals);
+    return parseUnits(value.toString(), decimals);
 };
 
+/** Lightweight RPC liveness check via viem `getChainId`. Kept for callers that want a pre-flight probe. */
 export async function isRpcValid(rpcUrl: string | undefined): Promise<boolean> {
     if (!rpcUrl) return false;
-    const provider = new JsonRpcProvider(rpcUrl);
     try {
-        await provider.getNetwork();
+        const client = createPublicClient({ chain: arbitrum, transport: http(rpcUrl) });
+        await client.getChainId();
         return true;
-    } catch (error) {
+    } catch {
         return false;
     }
 }
 
 export async function getUserAllowance(
     params: CreateMarketTxParams
-): Promise<number> {
-    const { factoryContractAddress, baseToken, creator, rpcUrl } = params
-    const isRpcWorking = await isRpcValid(rpcUrl)
-    if (!rpcUrl || !isRpcWorking) { throw new Error("Provided RPC URL is not valid or not working") }
-    const provider = new JsonRpcProvider(rpcUrl);
-    const ERC20ApprovalContract = new Contract(baseToken, ERC20Abi, provider);
-    const userAllowance = await ERC20ApprovalContract.allowance(creator, factoryContractAddress)
-    return userAllowance
+): Promise<bigint> {
+    const { factoryContractAddress, baseToken, creator, rpcUrl } = params;
+    if (!rpcUrl) throw new Error("Provided RPC URL is not valid or not working");
+    const client = createPublicClient({ chain: arbitrum, transport: http(rpcUrl) });
+    const allowance = await client.readContract({
+        address: baseToken as Address,
+        abi: erc20Abi,
+        functionName: 'allowance',
+        args: [creator as Address, factoryContractAddress as Address],
+    });
+    return allowance as bigint;
 }
 
 /**
@@ -42,21 +49,18 @@ export async function checkMarketTokenAllowance(
     params: { marketContractAddress: `0x${string}`; owner: `0x${string}`; rpcUrl: string }
 ): Promise<{ allowance: bigint; baseToken: `0x${string}`; decimals: number }> {
     const { marketContractAddress, owner, rpcUrl } = params;
-    const isRpcWorking = await isRpcValid(rpcUrl);
-    if (!rpcUrl || !isRpcWorking) { throw new Error("Provided RPC URL is not valid or not working") }
+    if (!rpcUrl) throw new Error("Provided RPC URL is not valid or not working");
 
     const baseToken = await getMarketBaseToken({ marketContractAddress, rpcUrl });
-
-    const provider = new JsonRpcProvider(rpcUrl);
-    const tokenContract = new Contract(baseToken, ERC20Abi, provider);
+    const client = createPublicClient({ chain: arbitrum, transport: http(rpcUrl) });
 
     const [userAllowance, tokenDecimals] = await Promise.all([
-        tokenContract.allowance(owner, marketContractAddress),
-        tokenContract.decimals(),
+        client.readContract({ address: baseToken, abi: erc20Abi, functionName: 'allowance', args: [owner, marketContractAddress] }),
+        client.readContract({ address: baseToken, abi: erc20Abi, functionName: 'decimals' }),
     ]);
 
     return {
-        allowance: BigInt(userAllowance),
+        allowance: userAllowance as bigint,
         baseToken,
         decimals: Number(tokenDecimals),
     };

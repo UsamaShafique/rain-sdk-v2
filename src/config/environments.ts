@@ -5,11 +5,6 @@ export const DEFAULT_RPCS: string[] = [
     "https://rpc.sentio.xyz/arbitrum-one"
 ]
 
-export function getRandomRpc(): string {
-    const index = Math.floor(Math.random() * DEFAULT_RPCS.length);
-    return DEFAULT_RPCS[index];
-}
-
 /** Deterministic default RPC — every instance resolves to the same endpoint. */
 export function getDefaultRpc(): string {
     return DEFAULT_RPCS[0];

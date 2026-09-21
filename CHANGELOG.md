@@ -9,6 +9,36 @@ APIs slated for removal are marked `@deprecated` in the type declarations for at
 least one minor release before they are removed, with the replacement named in
 the deprecation notice. Breaking removals land only in a major version.
 
+## [2.4.0] - Production readiness
+
+No breaking changes to the public API.
+
+### Fixed
+- **Docs correctness:** the `deadline` examples and parameter tables in the README
+  no longer show `deadline: 600n` (a duration), which the builders reject since
+  2.2.0. They now show an absolute unix timestamp and note the default 10-min window.
+
+### Changed
+- **viem-only (dropped `ethers`):** `utils/helpers.ts` (allowance + decimals reads,
+  `parseUnits`, RPC liveness) is ported to viem. `ethers` is removed from
+  dependencies — one web3 stack, smaller install/bundle. The redundant
+  per-call `getNetwork()` RPC round-trip before allowance checks is gone.
+- **`RainAA` browser-only, documented + guarded:** session methods now throw a
+  clear error when `indexedDB` is unavailable (Node/SSR) instead of a cryptic
+  `ReferenceError`. Documented in the README and class JSDoc. Use `Rain` for
+  server-side flows.
+
+### Added
+- **Test suite (vitest):** unit tests for the validators and encoders, plus a
+  gated Arbitrum integration test (`npm run test:integration`) exercising the
+  on-chain read path. Scripts: `test`, `test:watch`, `test:integration`.
+- **CI:** GitHub Actions — build + test on push/PR, and publish-on-release
+  (`.github/workflows/`).
+
+### Removed
+- Dead `getRandomRpc` export (superseded by `getDefaultRpc` in 2.3.0).
+- Committed `*.tgz` tarball removed from the repo and gitignored.
+
 ## [2.3.0] - Developer experience
 
 Additive, non-breaking. Fills in the untyped core data model and adds the

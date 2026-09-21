@@ -1,16 +1,13 @@
 import { LoginParams, LoginResult } from './types.js';
 
-/** Decode the `exp` (unix seconds) claim from a JWT without verifying it. Cross-environment (browser + Node). */
+/** Decode the `exp` (unix seconds) claim from a JWT without verifying it. Uses `atob` (browser + Node 18+). */
 function decodeJwtExp(token: string): number | undefined {
   try {
     const part = token.split('.')[1];
-    if (!part) return undefined;
+    if (!part || typeof atob !== 'function') return undefined;
     const b64 = part.replace(/-/g, '+').replace(/_/g, '/');
     const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);
-    const json = typeof atob === 'function'
-      ? atob(padded)
-      : Buffer.from(padded, 'base64').toString('binary');
-    const payload = JSON.parse(json);
+    const payload = JSON.parse(atob(padded));
     return typeof payload?.exp === 'number' ? payload.exp : undefined;
   } catch {
     return undefined;

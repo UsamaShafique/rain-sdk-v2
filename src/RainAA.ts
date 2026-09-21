@@ -15,6 +15,12 @@ type SessionData = {
 };
 
 function openSessionDB(): Promise<IDBDatabase> {
+    if (typeof indexedDB === 'undefined') {
+        return Promise.reject(new Error(
+            'RainAA requires a browser environment: session persistence uses indexedDB, ' +
+            'which is unavailable in Node.js/SSR. RainAA is browser-only.'
+        ));
+    }
     return new Promise((resolve, reject) => {
         const req = indexedDB.open(DB_NAME, 1);
         req.onupgradeneeded = () => {
@@ -58,6 +64,13 @@ async function deleteSession(key: string): Promise<void> {
     });
 }
 
+/**
+ * Smart-account (Account Abstraction) manager with Alchemy gas sponsorship.
+ *
+ * ⚠️ **Browser-only.** Session persistence uses `indexedDB`, so `RainAA` is not
+ * supported in Node.js or SSR — session methods throw a descriptive error there.
+ * The stateless `Rain` class works in any environment; use it for server-side flows.
+ */
 export class RainAA {
     private config: RainConfig;
     private _client: any | null = null;        // EOA-signed client (for grantPermissions)
