@@ -4,6 +4,7 @@ import { SplitTxParams, RawTransaction } from "./types.js";
 import { SPLIT } from "../constants/contractmethods.js";
 import { checkMarketTokenAllowance } from "../utils/helpers.js";
 import { buildApproveRawTx } from "./buildApprovalRawTx.js";
+import { assertOption } from "./validation.js";
 
 export async function buildSplitRawTx(
     params: SplitTxParams & { walletAddress: `0x${string}`; rpcUrl: string }
@@ -13,6 +14,7 @@ export async function buildSplitRawTx(
     if (!marketContractAddress) throw new Error("marketContractAddress is required");
     if (option === undefined || option === null) throw new Error("option is required");
     if (!amount || amount <= 0n) throw new Error("amount must be greater than 0");
+    assertOption(option);
 
     const { allowance, baseToken } = await checkMarketTokenAllowance({ marketContractAddress, owner: walletAddress, rpcUrl });
 

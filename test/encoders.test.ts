@@ -13,14 +13,15 @@ const TOKEN = '0x0000000000000000000000000000000000000002' as `0x${string}`;
 const FUTURE = BigInt(Math.floor(Date.now() / 1000) + 600);
 
 describe('buildSellOptionRawTx', () => {
-  it('encodes a sellOption call with the given args', () => {
-    const tx = buildSellOptionRawTx({
+  it('encodes a sellOption call with an explicit minAmountOut (no network)', async () => {
+    const tx = await buildSellOptionRawTx({
       marketContractAddress: MARKET,
       selectedOption: 1n,
       optionSide: 1,
       sharesAmount: 1000n,
-      minAmountOut: 0n,
+      minAmountOut: 250n, // explicit — opt out of the on-chain quote
       deadline: FUTURE,
+      rpcUrl: 'http://127.0.0.1:1', // must NOT be hit when minAmountOut is set
     });
     expect(tx.to).toBe(MARKET);
     expect(tx.value).toBe(0n);
@@ -28,18 +29,25 @@ describe('buildSellOptionRawTx', () => {
     expect(decoded.functionName).toBe('sellOption');
     expect(decoded.args?.[0]).toBe(1n); // option
     expect(decoded.args?.[2]).toBe(1000n); // shares
+    expect(decoded.args?.[3]).toBe(250n); // minAmountOut passed through unchanged
   });
 
-  it('rejects a 0 option (1-based) before encoding', () => {
-    expect(() => buildSellOptionRawTx({
-      marketContractAddress: MARKET, selectedOption: 0n, optionSide: 1, sharesAmount: 1000n, deadline: FUTURE,
-    })).toThrow(RainValidationError);
+  it('rejects a 0 option (1-based) before any network call', async () => {
+    await expect(buildSellOptionRawTx({
+      marketContractAddress: MARKET, selectedOption: 0n, optionSide: 1, sharesAmount: 1000n, deadline: FUTURE, rpcUrl: 'http://127.0.0.1:1',
+    })).rejects.toThrow(RainValidationError);
   });
 
-  it('rejects a duration-style deadline before encoding', () => {
-    expect(() => buildSellOptionRawTx({
-      marketContractAddress: MARKET, selectedOption: 1n, optionSide: 1, sharesAmount: 1000n, deadline: 600n,
-    })).toThrow(/deadline/);
+  it('rejects a duration-style deadline before any network call', async () => {
+    await expect(buildSellOptionRawTx({
+      marketContractAddress: MARKET, selectedOption: 1n, optionSide: 1, sharesAmount: 1000n, deadline: 600n, rpcUrl: 'http://127.0.0.1:1',
+    })).rejects.toThrow(/deadline/);
+  });
+
+  it('rejects slippageTolerance > 100 before any network call', async () => {
+    await expect(buildSellOptionRawTx({
+      marketContractAddress: MARKET, selectedOption: 1n, optionSide: 1, sharesAmount: 1000n, slippageTolerance: 500n, deadline: FUTURE, rpcUrl: 'http://127.0.0.1:1',
+    })).rejects.toThrow(/slippageTolerance/);
   });
 });
 

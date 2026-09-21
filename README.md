@@ -199,6 +199,8 @@ const txsRain = await rain.buildCreateMarketTx({
 | `tradingModel` | `TradingModel` | `AMM (0)` or `OrderBook (1)` |
 | `marketImage` | `string` | Market image URL (required) |
 
+> **Constraints (validated, throws if violated):** `no_of_options ≥ 2`; `marketOptions`, `barValues`, and (if provided) `initialYesPrices` must each have length `no_of_options`; every `barValue` must be within `0–100` and the set must **sum to 100**; each `initialYesPrice` must be within `(0, 1e18)` exclusive. Previously out-of-spec bar values were silently redistributed onto the last option — they are now rejected.
+
 ---
 
 ### Trading
@@ -237,7 +239,7 @@ const txs = await rain.buildEnterOptionTx({
 
 #### `buildSellOptionTx(params): Promise<RawTransaction>`
 
-Market-sell shares of an option into the resting buy order book. No approval needed (you're selling shares, not tokens). Slippage protection is auto-calculated from on-chain `getCurrentPrice`.
+Market-sell shares of an option into the resting buy order book. No approval needed (you're selling shares, not tokens). Slippage protection is auto-calculated from on-chain `getSellProceeds` (default 5%) when `minAmountOut` is omitted. Pass `minAmountOut: 0n` to opt out explicitly.
 
 ```typescript
 const tx = await rain.buildSellOptionTx({
@@ -257,7 +259,7 @@ const tx = await rain.buildSellOptionTx({
 | `selectedOption` | `bigint` | Option index (1-based) |
 | `optionSide` | `OptionSide` | `Yes (1)` or `No (2)` |
 | `sharesAmount` | `bigint` | Number of shares to sell |
-| `minAmountOut` | `bigint` | *(Optional)* Minimum base tokens to receive. Auto-calculated from `getCurrentPrice` with slippage if not set |
+| `minAmountOut` | `bigint` | *(Optional)* Minimum base tokens to receive. Auto-calculated from `getSellProceeds` with slippage if not set. Pass `0n` to opt out |
 | `slippageTolerance` | `bigint` | *(Optional)* Slippage percentage (e.g. `5n` = 5%). Default: 5% |
 | `deadline` | `bigint` | *(Optional)* Absolute unix timestamp in seconds, e.g. `BigInt(Math.floor(Date.now()/1000) + 600)`. Omit for a default 10-min window. A small duration like `600n` is **rejected** (`RainValidationError`). |
 

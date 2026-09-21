@@ -35,7 +35,8 @@ export interface SellOptionTxParams {
     selectedOption: bigint;  // option index (1-based)
     optionSide: OptionSide;  // Yes = 1, No = 2
     sharesAmount: bigint;    // number of shares to sell
-    minAmountOut?: bigint;   // slippage protection: minimum base tokens to receive (defaults to 0)
+    minAmountOut?: bigint;   // slippage protection: minimum base tokens to receive. Auto-calculated from on-chain getSellProceeds if not set. Pass 0n to explicitly opt out.
+    slippageTolerance?: bigint; // slippage % (e.g. 5n = 5%). Defaults to 5% when minAmountOut is not set
     deadline?: bigint;       // absolute unix timestamp (defaults to now + 10 min)
 }
 

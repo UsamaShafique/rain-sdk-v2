@@ -184,8 +184,8 @@ export class Rain {
     return buildEnterOptionRawTx({ ...params, rpcUrl: this.rpcUrl! });
   }
 
-  buildSellOptionTx(params: SellOptionTxParams): RawTransaction {
-    return buildSellOptionRawTx(params);
+  async buildSellOptionTx(params: SellOptionTxParams): Promise<RawTransaction> {
+    return buildSellOptionRawTx({ ...params, rpcUrl: this.rpcUrl! });
   }
 
   async buildAddLiquidityTx(params: AddLiquidityTxParams & { walletAddress: `0x${string}` }): Promise<RawTransaction[]> {

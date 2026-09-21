@@ -2,6 +2,7 @@ import { encodeFunctionData } from "viem";
 import { MarketsAbi } from "../abi/MarketsAbi.js";
 import { MergeTxParams, RawTransaction } from "./types.js";
 import { MERGE } from "../constants/contractmethods.js";
+import { assertOption } from "./validation.js";
 
 export function buildMergeRawTx(params: MergeTxParams): RawTransaction {
     const { marketContractAddress, option, amount } = params;
@@ -9,6 +10,7 @@ export function buildMergeRawTx(params: MergeTxParams): RawTransaction {
     if (!marketContractAddress) throw new Error("marketContractAddress is required");
     if (option === undefined || option === null) throw new Error("option is required");
     if (!amount || amount <= 0n) throw new Error("amount must be greater than 0");
+    assertOption(option);
 
     return {
         to: marketContractAddress,

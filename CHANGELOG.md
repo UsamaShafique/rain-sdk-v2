@@ -9,6 +9,38 @@ APIs slated for removal are marked `@deprecated` in the type declarations for at
 least one minor release before they are removed, with the replacement named in
 the deprecation notice. Breaking removals land only in a major version.
 
+## [2.5.0] - Sell slippage + create-market validation
+
+### Fixed
+- **Unprotected sells (critical):** `buildSellOptionTx` hard-coded `minAmountOut = 0`
+  and silently ignored slippage — every SDK sell shipped with zero MEV/slippage
+  protection despite the docs. It now quotes `getSellProceeds` on-chain and applies
+  `slippageTolerance` (default 5%) when `minAmountOut` is omitted. Verified against
+  live Arbitrum: the quote is the correct (slightly conservative) `minAmountOut`
+  basis. Pass `minAmountOut: 0n` to opt out explicitly.
+- **Silent market-odds corruption:** `createMarket` now validates bar values and
+  option arrays and **throws** instead of silently redistributing the rounding
+  remainder onto the last option (which turned `[60,60]` into a 60/40 market).
+  Enforced: `no_of_options ≥ 2`; `marketOptions` / `barValues` / `initialYesPrices`
+  lengths equal `no_of_options`; each bar value in `0–100`; bar values sum to 100;
+  each `initialYesPrice` in `(0, 1e18)`.
+- **`split` / `merge` option guard:** both now reject `option: 0n` (options are
+  1-based) before any network call — the last two builders missing the guard.
+
+### Changed (breaking)
+- **`buildSellOptionTx` is now async** (`Promise<RawTransaction>`) because it makes
+  an on-chain quote — this matches what the README already documented. Callers must
+  `await` it. `SellOptionTxParams` gains `slippageTolerance?`.
+
+### Added
+- Test coverage grew to cover sell slippage derivation (mocked quote), create-market
+  validation, and the split/merge option guards.
+
+### Note for integrators
+- Confirm the fee treatment of `getSellProceeds` vs. `sellOption` with the contract
+  team; the SDK uses it as the contract's own sell quote and applies the slippage
+  discount to it (empirically a conservative, safe floor).
+
 ## [2.4.0] - Production readiness
 
 No breaking changes to the public API.

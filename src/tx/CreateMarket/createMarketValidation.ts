@@ -17,6 +17,7 @@ export function validateCreateMarketParams(params: CreateMarketTxParams) {
         baseToken,
         factoryContractAddress,
         tokenDecimals,
+        initialYesPrices,
     } = params;
 
     // Required field validations
@@ -56,6 +57,34 @@ export function validateCreateMarketParams(params: CreateMarketTxParams) {
         throw new Error("Market cannot be opened: inputAmountWei must be at least $0.1");
     }
     if (startTime >= endTime) throw new Error("startTime must be earlier than endTime");
+
+    // Cross-field validation — these previously slipped through and were silently
+    // "fixed" by normalizeBarValues (which dumped the rounding remainder onto the
+    // last option, producing odds the caller never asked for). Reject loudly instead.
+    const optionCount = Number(no_of_options);
+    if (optionCount < 2) throw new Error("no_of_options must be at least 2");
+    if (marketOptions.length !== optionCount) {
+        throw new Error(`marketOptions length (${marketOptions.length}) must equal no_of_options (${optionCount})`);
+    }
+    if (barValues.length !== optionCount) {
+        throw new Error(`barValues length (${barValues.length}) must equal no_of_options (${optionCount})`);
+    }
+    if (barValues.some(v => typeof v !== "number" || !Number.isFinite(v) || v < 0 || v > 100)) {
+        throw new Error("each barValue must be a number between 0 and 100");
+    }
+    const barSum = barValues.reduce((s, v) => s + v, 0);
+    if (Math.abs(barSum - 100) > 0.01) {
+        throw new Error(`barValues must sum to 100 (got ${barSum})`);
+    }
+    if (initialYesPrices !== undefined) {
+        if (initialYesPrices.length !== optionCount) {
+            throw new Error(`initialYesPrices length (${initialYesPrices.length}) must equal no_of_options (${optionCount})`);
+        }
+        const ONE = 10n ** 18n;
+        if (initialYesPrices.some(p => p <= 0n || p >= ONE)) {
+            throw new Error("each initialYesPrice must be within (0, 1e18) exclusive");
+        }
+    }
 
     return true;
 }
