@@ -2,6 +2,7 @@ import { encodeFunctionData } from "viem";
 import { MarketsAbi } from "../abi/MarketsAbi.js";
 import { SellOptionTxParams, RawTransaction } from "./types.js";
 import { SELL_OPTION } from "../constants/contractmethods.js";
+import { assertOption, assertDeadline } from "./validation.js";
 
 const DEFAULT_DEADLINE_DURATION = 600; // 10 minutes
 
@@ -16,6 +17,8 @@ export function buildSellOptionRawTx(
     if (optionSide === undefined || optionSide === null) throw new Error("optionSide is required");
     if (!sharesAmount) throw new Error("sharesAmount is required");
     if (sharesAmount <= 0n) throw new Error("sharesAmount must be greater than 0");
+    assertOption(selectedOption, "selectedOption");
+    assertDeadline(deadline);
 
     return {
         to: marketContractAddress,

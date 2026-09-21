@@ -5,6 +5,7 @@ import { EnterOptionTxParams, RawTransaction } from "./types.js";
 import { ENTER_OPTION } from "../constants/contractmethods.js";
 import { checkMarketTokenAllowance } from "../utils/helpers.js";
 import { buildApproveRawTx } from "./buildApprovalRawTx.js";
+import { assertOption, assertSlippage, assertDeadline } from "./validation.js";
 
 const DEFAULT_SLIPPAGE = 5n; // 5%
 const DEFAULT_DEADLINE_DURATION = 600; // 10 minutes
@@ -19,6 +20,9 @@ export async function buildEnterOptionRawTx(
     if (optionSide === undefined || optionSide === null) throw new Error("optionSide is required");
     if (!buyAmountInWei) throw new Error("buyAmountInWei is required");
     if (buyAmountInWei <= 0n) throw new Error("buyAmountInWei must be greater than 0");
+    assertOption(selectedOption, "selectedOption");
+    assertSlippage(slippageTolerance);
+    assertDeadline(deadline);
 
     const { allowance, baseToken } = await checkMarketTokenAllowance({ marketContractAddress, owner: walletAddress, rpcUrl });
 

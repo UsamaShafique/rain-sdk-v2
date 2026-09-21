@@ -10,6 +10,11 @@ export function getRandomRpc(): string {
     return DEFAULT_RPCS[index];
 }
 
+/** Deterministic default RPC — every instance resolves to the same endpoint. */
+export function getDefaultRpc(): string {
+    return DEFAULT_RPCS[0];
+}
+
 export const USDT_SYMBOL_DEV = "USDTm";
 // export const USDT_SYMBOL_PROD = "USD₮0";
 

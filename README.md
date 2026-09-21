@@ -24,7 +24,7 @@ import { arbitrum } from 'viem/chains';
 // Initialize SDK
 const rain = new Rain({
   environment: 'development', // 'development' | 'stage' | 'production'
-  rpcUrl: 'https://arb1.arbitrum.io/rpc', // optional, uses random public RPC if omitted
+  rpcUrl: 'https://arb1.arbitrum.io/rpc', // optional; falls back to a public RPC (pass your own in production)
 });
 
 // Get environment config
@@ -62,7 +62,7 @@ const rain = new Rain(config?: RainCoreConfig);
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `environment` | `'development' \| 'stage' \| 'production'` | `'development'` | Target environment |
-| `rpcUrl` | `string` | Random public RPC | Custom Arbitrum RPC URL |
+| `rpcUrl` | `string` | Fixed public RPC | Custom Arbitrum RPC URL. Omitting it uses a single deterministic public RPC; in `production` this also emits a `console.warn` — pass a dedicated endpoint. |
 | `apiUrl` | `string` | From environment | Custom API URL |
 
 ---
@@ -852,7 +852,7 @@ const signature = await signLoginMessage(walletClient, '0x...' as `0x${string}`)
 const result = await rain.login({
   signature, // from signLoginMessage
   walletAddress: '0x...', // EOA address
-  smartWalletAddress: '0x...', // Smart account address
+  smartWalletAddress: '0x...', // optional — defaults to walletAddress for plain-EOA integrations
   referredBy: 'CODE', // optional referral code
 });
 
@@ -1541,6 +1541,54 @@ socket.disconnect();
 | `resolution-refund/{poolId}/{userId}` | Resolution bond refunded |
 | `resolver-reward/{poolId}/{userId}` | Resolver reward |
 | `notifications/{userId}` | Personal notifications |
+
+---
+
+## Error Handling & Validation
+
+### Build-time validation
+
+Transaction builders validate their inputs synchronously — before any encoding
+or broadcast — and throw `RainValidationError` on the common footguns:
+
+- `deadline` must be an **absolute unix timestamp** (seconds), not a duration.
+  `deadline: 600n` is rejected; use `BigInt(Math.floor(Date.now()/1000) + 600)`.
+- `slippageTolerance` is a **whole percent** (`5n` = 5%), and must be `0–100`.
+- `option` / `selectedOption` are **1-based** (the first option is `1`, never `0`).
+
+```typescript
+import { RainValidationError } from 'rain-sdk-v2';
+
+try {
+  await rain.buildEnterOptionTx({ /* ... */, deadline: 600n });
+} catch (err) {
+  if (err instanceof RainValidationError) {
+    console.error(err.field, err.message); // 'deadline', 'Invalid deadline: ...'
+  }
+}
+```
+
+### API errors
+
+REST methods throw `RainApiError` (a subclass of `Error`) on non-2xx responses,
+carrying structured fields so you can branch on `code` instead of parsing strings:
+
+```typescript
+import { RainApiError } from 'rain-sdk-v2';
+
+try {
+  await rain.getSomeData(/* ... */);
+} catch (err) {
+  if (err instanceof RainApiError) {
+    console.error(err.status, err.code, err.endpoint, err.body);
+    // code: 'NOT_FOUND' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'RATE_LIMITED' | 'SERVER_ERROR' | 'UNKNOWN'
+  }
+}
+```
+
+Legitimate empty states are **not** errors: `getPnlByPoolId` (no position) and
+`getTokenPrice` (non-whitelisted token) return `{ statusCode: 200, data: null }`
+rather than throwing on a 404.
 
 ---
 

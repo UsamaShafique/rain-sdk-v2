@@ -16,7 +16,7 @@ import { buildCalculateWinnerRawTx, CalculateWinnerTxParams } from './tx/buildCa
 import { buildExtendTimeRawTx, ExtendTimeTxParams } from './tx/buildExtendTimeRawTx.js';
 import { getUserActiveBuyOrders, getUserActiveSellOrders, getFirstBuyOrderPrice, getFirstSellOrderPrice, getBuyOrdersAtPrice, getSellOrdersAtPrice, checkOrderExists } from './markets/getOrderInfo.js';
 import { RainCoreConfig, RainEnvironment } from './types.js';
-import { ALLOWED_ENVIRONMENTS, ENV_CONFIG, getRandomRpc } from './config/environments.js';
+import { ALLOWED_ENVIRONMENTS, ENV_CONFIG, getDefaultRpc } from './config/environments.js';
 import { loginUser } from './auth/login.js';
 import { LoginParams, LoginResult } from './auth/types.js';
 import { getUserOptionLPShares } from './markets/getUserOptionLPShares.js';
@@ -83,7 +83,13 @@ export class Rain {
       );
     }
     this.environment = environment;
-    this.rpcUrl = rpcUrl ?? getRandomRpc();
+    if (!rpcUrl && environment === "production") {
+      console.warn(
+        "[rain-sdk-v2] No rpcUrl provided in production; falling back to a public Arbitrum RPC. " +
+        "Public RPCs have shared rate limits and varying reliability — pass a dedicated rpcUrl."
+      );
+    }
+    this.rpcUrl = rpcUrl ?? getDefaultRpc();
     const envConfig = ENV_CONFIG[this.environment];
     this.marketFactory = envConfig.market_factory_address
     this.apiUrl = apiUrl ?? envConfig.apiUrl;

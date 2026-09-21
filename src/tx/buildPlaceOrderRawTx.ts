@@ -4,6 +4,7 @@ import { PlaceBuyOrderTxParams, PlaceSellOrderTxParams, RawTransaction } from ".
 import { PLACE_BUY_ORDER, PLACE_SELL_ORDER } from "../constants/contractmethods.js";
 import { checkMarketTokenAllowance } from "../utils/helpers.js";
 import { buildApproveRawTx } from "./buildApprovalRawTx.js";
+import { assertOption } from "./validation.js";
 
 export async function buildPlaceBuyOrderRawTx(
     params: PlaceBuyOrderTxParams & { walletAddress: `0x${string}`; rpcUrl: string }
@@ -15,6 +16,7 @@ export async function buildPlaceBuyOrderRawTx(
     if (optionSide === undefined || optionSide === null) throw new Error("optionSide is required");
     if (!price || price <= 0n) throw new Error("price must be greater than 0");
     if (!amount || amount <= 0n) throw new Error("amount must be greater than 0");
+    assertOption(option);
 
     const { allowance, baseToken } = await checkMarketTokenAllowance({ marketContractAddress, owner: walletAddress, rpcUrl });
 
@@ -45,6 +47,7 @@ export function buildPlaceSellOrderRawTx(params: PlaceSellOrderTxParams): RawTra
     if (optionSide === undefined || optionSide === null) throw new Error("optionSide is required");
     if (!price || price <= 0n) throw new Error("price must be greater than 0");
     if (!shares || shares <= 0n) throw new Error("shares must be greater than 0");
+    assertOption(option);
 
     return {
         to: marketContractAddress,

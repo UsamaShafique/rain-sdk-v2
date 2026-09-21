@@ -134,11 +134,16 @@ export async function getPnlByPoolId(
   params: PnlByPoolIdParams,
   config: ApiConfig
 ): Promise<ApiResponse> {
-  const res = await fetch(`${config.apiUrl}/investments/pnl/${encodeURIComponent(params.poolId)}`, {
+  const endpoint = `/investments/pnl/${encodeURIComponent(params.poolId)}`;
+  const res = await fetch(`${config.apiUrl}${endpoint}`, {
     method: 'GET',
     headers: buildHeaders(config),
   });
-  return handleResponse(res);
+  // No position in this pool is a legitimate empty state, not an error.
+  if (res.status === 404) {
+    return { statusCode: 200, message: 'No position for this pool', data: null };
+  }
+  return handleResponse(res, endpoint);
 }
 
 export async function getTopWinnersLosers(

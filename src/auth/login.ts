@@ -4,6 +4,8 @@ export async function loginUser(
   params: LoginParams & { apiUrl: string }
 ): Promise<LoginResult> {
   const { signature, walletAddress, smartWalletAddress, referredBy, apiUrl } = params;
+  // Plain-EOA integrations may omit smartWalletAddress; fall back to the EOA.
+  const resolvedSmartWalletAddress = smartWalletAddress ?? walletAddress;
 
   const res = await fetch(`${apiUrl}/auth/login-or-register-with-walletAddress`, {
     method: 'POST',
@@ -14,7 +16,7 @@ export async function loginUser(
     body: JSON.stringify({
       sign: signature,
       walletAddress,
-      userSmartAddress: smartWalletAddress,
+      userSmartAddress: resolvedSmartWalletAddress,
       ...(referredBy ? { referredBy } : {}),
     }),
   });

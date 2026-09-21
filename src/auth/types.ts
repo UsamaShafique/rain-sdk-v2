@@ -3,8 +3,8 @@ export interface LoginParams {
   signature: string;
   /** EOA wallet address */
   walletAddress: string;
-  /** Smart account / AA wallet address */
-  smartWalletAddress: string;
+  /** Smart account / AA wallet address. Defaults to `walletAddress` for plain-EOA integrations. */
+  smartWalletAddress?: string;
   /** Optional referral code */
   referredBy?: string;
 }

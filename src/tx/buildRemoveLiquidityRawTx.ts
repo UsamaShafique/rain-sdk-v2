@@ -3,6 +3,7 @@ import { arbitrum } from "viem/chains";
 import { MarketsAbi } from "../abi/MarketsAbi.js";
 import { RemoveLiquidityTxParams, RawTransaction } from "./types.js";
 import { REMOVE_LIQUIDITY } from "../constants/contractmethods.js";
+import { assertOption, assertSlippage, assertDeadline } from "./validation.js";
 
 const DEFAULT_SLIPPAGE = 5n; // 5%
 const DEFAULT_DEADLINE_DURATION = 600; // 10 minutes
@@ -16,6 +17,9 @@ export async function buildRemoveLiquidityRawTx(
     if (option === undefined || option === null) throw new Error("option is required");
     if (!lpShares) throw new Error("lpShares is required");
     if (lpShares <= 0n) throw new Error("lpShares must be greater than 0");
+    assertOption(option);
+    assertSlippage(slippageTolerance);
+    assertDeadline(deadline);
 
     let effectiveMinYes = minYesOut;
     let effectiveMinNo = minNoOut;

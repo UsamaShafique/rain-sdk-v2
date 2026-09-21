@@ -5,6 +5,7 @@ import { AddLiquidityTxParams, RawTransaction } from "./types.js";
 import { ENTER_LIQUIDITY } from "../constants/contractmethods.js";
 import { checkMarketTokenAllowance } from "../utils/helpers.js";
 import { buildApproveRawTx } from "./buildApprovalRawTx.js";
+import { assertOption, assertSlippage, assertDeadline } from "./validation.js";
 
 const DEFAULT_SLIPPAGE = 5n; // 5%
 const DEFAULT_DEADLINE_DURATION = 600; // 10 minutes
@@ -18,6 +19,9 @@ export async function buildAddLiquidityRawTx(
     if (option === undefined || option === null) throw new Error("option is required");
     if (!totalAmountInWei) throw new Error("totalAmountInWei is required");
     if (totalAmountInWei <= 0n) throw new Error("totalAmountInWei must be greater than 0");
+    assertOption(option);
+    assertSlippage(slippageTolerance);
+    assertDeadline(deadline);
 
     const { allowance, baseToken } = await checkMarketTokenAllowance({ marketContractAddress, owner: walletAddress, rpcUrl });
 
