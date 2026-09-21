@@ -14,4 +14,6 @@ export interface LoginResult {
   accessToken: string;
   /** Backend user ID */
   userId: string;
+  /** Token expiry as a unix timestamp (seconds), decoded from the JWT `exp` claim. Undefined if the token has no `exp`. */
+  expiresAt?: number;
 }

@@ -3,7 +3,7 @@ import {
   PoolListingByCreatorParams, VerifyAccessCodeParams, PoolTotalParticipantsParams,
   SearchPoolParams, RelatedPoolsParams, UpdateStreamingParams,
   UpdatePoolResolutionTimeParams, FindPoolFallbackParams, SignOraclesExtendTimeParams,
-  TrendingTagsParams,
+  TrendingTagsParams, PaginatedPools,
 } from './types.js';
 import { buildHeaders, buildQuery, handleResponse } from './helpers.js';
 
@@ -21,25 +21,25 @@ export async function accessPool(
 export async function getPublicPools(
   params: PublicPoolsParams,
   config: ApiConfig
-): Promise<ApiResponse> {
+): Promise<ApiResponse<PaginatedPools>> {
   const qs = buildQuery({ limit: params.limit, offset: params.offset, tag: params.tag, sortBy: params.sortBy, status: params.status });
   const res = await fetch(`${config.apiUrl}/pools/public-pools${qs}`, {
     method: 'GET',
     headers: buildHeaders(config),
   });
-  return handleResponse(res);
+  return handleResponse(res, '/pools/public-pools');
 }
 
 export async function getPrivatePools(
   params: PrivatePoolsParams,
   config: ApiConfig
-): Promise<ApiResponse> {
+): Promise<ApiResponse<PaginatedPools>> {
   const qs = buildQuery({ limit: params.limit, offset: params.offset, tag: params.tag, status: params.status });
   const res = await fetch(`${config.apiUrl}/pools/pools-private${qs}`, {
     method: 'GET',
     headers: buildHeaders(config),
   });
-  return handleResponse(res);
+  return handleResponse(res, '/pools/pools-private');
 }
 
 export async function getPoolById(

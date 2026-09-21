@@ -3,6 +3,36 @@
 All notable changes to `rain-sdk-v2` are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## Deprecation policy
+
+APIs slated for removal are marked `@deprecated` in the type declarations for at
+least one minor release before they are removed, with the replacement named in
+the deprecation notice. Breaking removals land only in a major version.
+
+## [2.3.0] - Developer experience
+
+Additive, non-breaking. Fills in the untyped core data model and adds the
+convenience helpers the docs previously pushed onto the caller.
+
+### Added
+- **Typed pool DTOs (F-05):** exported `Pool`, `SubPool`, `PaginatedPools`, and
+  `TradingModelName`. `getPublicPools` / `getPrivatePools` now return
+  `ApiResponse<PaginatedPools>` instead of `unknown`. Socket `*EventData`
+  payloads now type their `pool` / `subPool` / `subMarkets` fields as
+  `Pool` / `SubPool`. Interfaces carry an index signature, so they are a safe
+  superset of the wire (dynamic field access still works).
+- **`rain.execute(txs, executor)` (F-07):** sequences the `[approval, main]`
+  arrays the builders return — sends each tx and awaits its receipt before the
+  next. Pluggable `TxExecutor` (`{ send, wait? }`) adapts to viem, ethers, or
+  RainAA. Also exported as the standalone `executeTxs`.
+- **`rain.parseAmount` / `rain.formatAmount` (F-14):** convert between
+  human-readable amounts and base units using the token's configured decimals
+  (no more hand-tracking that USDT is 6 and RAIN is 18).
+- **`RAIN_SOCKET_EVENTS` (F-16):** correctly-spelled camelCase aliases for the
+  raw wire event names (including the upstream-misspelled `dispute-time-extented`).
+- **Token expiry (F-13):** `LoginResult.expiresAt` exposes the decoded JWT `exp`
+  (unix seconds) so apps can renew proactively.
+
 ## [2.2.0] - Guardrails
 
 Adds fail-fast validation and structured errors. These surface mistakes

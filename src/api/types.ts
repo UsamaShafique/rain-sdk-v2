@@ -119,6 +119,57 @@ export type PoolStatus =
   | 'Under_Appeal'
   | 'Closed';
 
+export type TradingModelName = 'AMM' | 'OrderBook';
+
+/**
+ * A sub-market (option group) within a Pool. Known fields are typed; the
+ * `[key: string]: any` index signature preserves access to the long tail of
+ * server fields not yet enumerated here, so this is a safe superset — never a
+ * contradiction of the wire.
+ */
+export interface SubPool {
+  _id?: string;
+  subPoolIndex?: number;
+  question?: string;
+  options?: PoolOption[];
+  contractAddress?: string;
+  [key: string]: any;
+}
+
+/**
+ * The central pool data model. Known fields are typed; the index signature keeps
+ * additional server fields accessible without a cast.
+ */
+export interface Pool {
+  _id: string;
+  contractAddress?: string;
+  question?: string;
+  status?: PoolStatus;
+  tradingModel?: TradingModelName;
+  token?: PoolToken;
+  tags?: string[];
+  options?: PoolOption[];
+  subPools?: SubPool[];
+  isPrivate?: boolean;
+  startDate?: string;
+  endDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  [key: string]: any;
+}
+
+/** Paginated pool listing returned by `getPublicPools` / `getPrivatePools`. */
+export interface PaginatedPools {
+  pools: Pool[];
+  pagination?: {
+    total: number;
+    offset: number;
+    limit: number;
+    totalPages: number;
+  };
+  [key: string]: any;
+}
+
 export interface CreatePoolParams {
   question: string;
   isPrivate: boolean;

@@ -31,7 +31,8 @@ import { getResolverBondAmount } from './markets/getResolverBondAmount.js';
 import { getDisputeAppealFee } from './markets/getDisputeFee.js';
 import { optionResolverBond, optionResolutionProposer, isOptionDisputed, isOptionAppealed, optionDispute, optionAppeal, OptionDisputeInfo, OptionAppealInfo } from './markets/getDisputeState.js';
 import { getEntryShares, EntrySharesResult } from './markets/getEntryShares.js';
-import { createPublicClient, http, parseAbi } from 'viem';
+import { executeTxs, TxExecutor } from './tx/execute.js';
+import { createPublicClient, http, parseAbi, parseUnits, formatUnits } from 'viem';
 import { arbitrum } from 'viem/chains';
 import type { ApiConfig, UserProfileUpdateParams, UserHistoryParams, CreateCommentParams, CommentsListingParams, UpdateCommentParams, CommentCountParams, PublicPoolsParams, PrivatePoolsParams, PoolListingByCreatorParams, VerifyAccessCodeParams, PoolTotalParticipantsParams, SearchPoolParams, RelatedPoolsParams, UpdateStreamingParams, UpdatePoolResolutionTimeParams, FindPoolFallbackParams, SignOraclesExtendTimeParams, TrendingTagsParams, UserTotalInvestmentParams, OptionsTotalVolumeParams, PoolActivityParams, TopHoldersParams, UserInvestedPoolsParams, InvestmentVolumeGraphParams, UserPnlGraphParams, TopWinnersLosersParams, PnlByPoolIdParams, UserPositionsParams, OpenPositionsParams, UserSharePositionsParams, SearchInvestedPoolsParams, PriceDataParams, AddReviewParams, GetUserOrdersParams, OrderBookParams, GetUserOrderByPoolIdParams, OrdersListingByPoolParams, AddUserPointsParams, UserOnboardingParams, PointsGraphParams, GetNotificationsParams, MarkNotificationAsReadParams, CreateDisputeMessageParams, GetPoolDisputeConvoParams, FollowToggleParams, FollowCheckParams, FollowListParams, FollowStatsParams, RainBurnPerPoolParams, ToggleBookmarkParams, GetBookmarksParams, CheckBookmarkParams, LeaderboardParams, LeaderboardSearchParams, TraderRecentTradesParams } from './api/types.js';
 import * as usersApi from './api/users.js';
@@ -112,6 +113,44 @@ export class Rain {
 
   buildApprovalTx(params: ApproveTxParams): RawTransaction {
     return buildApproveRawTx(params);
+  }
+
+  /**
+   * Sequences an ordered list of raw transactions through a pluggable executor,
+   * awaiting each receipt before the next send. Use this for the `[approval, main]`
+   * arrays the builders return so the main tx never front-runs its approval.
+   *
+   * @example
+   * const txs = await rain.buildEnterOptionTx({ ... });
+   * await rain.execute(txs, {
+   *   send: (tx) => walletClient.sendTransaction({ to: tx.to, data: tx.data, value: tx.value ?? 0n }),
+   *   wait: (hash) => publicClient.waitForTransactionReceipt({ hash }),
+   * });
+   */
+  async execute(txs: RawTransaction[], executor: TxExecutor): Promise<`0x${string}`[]> {
+    return executeTxs(txs, executor);
+  }
+
+  /**
+   * Convert a human-readable amount to base units (wei) using the token's
+   * configured decimals. Throws if the token is not in the environment config.
+   * @example rain.parseAmount('5', usdtAddress) // 5_000_000n for 6-decimal USDT
+   */
+  parseAmount(value: string | number, tokenAddress: `0x${string}`): bigint {
+    const cfg = this.getTokenConfig(tokenAddress);
+    if (!cfg) throw new Error(`Unknown token ${tokenAddress}; not in the ${this.environment} environment config`);
+    return parseUnits(String(value), cfg.decimals);
+  }
+
+  /**
+   * Convert a base-unit (wei) amount to a human-readable string using the
+   * token's configured decimals. Throws if the token is not in the config.
+   * @example rain.formatAmount(5_000_000n, usdtAddress) // '5' for 6-decimal USDT
+   */
+  formatAmount(amount: bigint, tokenAddress: `0x${string}`): string {
+    const cfg = this.getTokenConfig(tokenAddress);
+    if (!cfg) throw new Error(`Unknown token ${tokenAddress}; not in the ${this.environment} environment config`);
+    return formatUnits(amount, cfg.decimals);
   }
 
   async getCreateMarketFees(tokenAddress: `0x${string}`, inputAmountWei: bigint): Promise<{ oracleFeePerOption: bigint; liquidityFee: bigint; feeMagnification: bigint; useBufferApproval: boolean; perOptionBuffer: bigint }> {

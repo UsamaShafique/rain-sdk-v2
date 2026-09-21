@@ -1544,6 +1544,67 @@ socket.disconnect();
 
 ---
 
+## Helpers & Execution
+
+### Executing transactions
+
+Builders return unsigned `RawTransaction[]` where index 0 may be an ERC-20
+approval. `rain.execute()` sends them in order and waits for each receipt before
+the next — so the main transaction never front-runs its approval:
+
+```typescript
+const txs = await rain.buildEnterOptionTx({ /* ... */ });
+
+await rain.execute(txs, {
+  send: (tx) => walletClient.sendTransaction({ to: tx.to, data: tx.data, value: tx.value ?? 0n }),
+  wait: (hash) => publicClient.waitForTransactionReceipt({ hash }),
+});
+```
+
+The executor is pluggable — adapt `{ send, wait? }` to viem, ethers, RainAA, or
+your own KMS. Also available as the standalone `executeTxs(txs, executor)`.
+
+### Amount conversion
+
+Convert between human-readable amounts and base units using the token's
+configured decimals — no need to track that USDT is 6 and RAIN is 18:
+
+```typescript
+rain.parseAmount('5', usdtAddress);        // 5_000_000n
+rain.formatAmount(5_000_000n, usdtAddress); // '5'
+```
+
+### Typed pool data
+
+`getPublicPools` / `getPrivatePools` return `ApiResponse<PaginatedPools>`, and
+socket event payloads type their `pool` / `subPool` fields as `Pool` / `SubPool`.
+Import the DTOs to annotate your own code:
+
+```typescript
+import type { Pool, SubPool, PaginatedPools } from 'rain-sdk-v2';
+```
+
+### Socket event names
+
+Use `RAIN_SOCKET_EVENTS` for correctly-spelled event identifiers with the
+low-level `.on()` API (some raw wire names are misspelled upstream):
+
+```typescript
+import { RAIN_SOCKET_EVENTS } from 'rain-sdk-v2';
+socket.on(RAIN_SOCKET_EVENTS.disputeTimeExtended, poolId, handler);
+```
+
+### Token expiry
+
+`login()` returns `expiresAt` (unix seconds, decoded from the JWT) so you can
+renew before it lapses:
+
+```typescript
+const { accessToken, expiresAt } = await rain.login({ /* ... */ });
+```
+
+---
+
 ## Error Handling & Validation
 
 ### Build-time validation

@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client';
+import type { Pool, SubPool } from '../api/types.js';
 
 export type RainSocketEvent =
   | 'enter-option'
@@ -33,40 +34,79 @@ export type RainSocketEvent =
   | 'notifications'
   | 'pool';
 
+/**
+ * Correctly-spelled, camelCase aliases for the raw wire event names — use these
+ * with the low-level `.on()` API instead of hand-typing the wire strings (some
+ * of which are misspelled upstream, e.g. `dispute-time-extented`).
+ */
+export const RAIN_SOCKET_EVENTS = {
+  enterOption: 'enter-option',
+  exitOption: 'exit-option',
+  liquidity: 'liquidity',
+  split: 'split',
+  merge: 'merge',
+  removeLiquidity: 'remove-liquidity',
+  syncPrice: 'sync-price',
+  orderCreated: 'order-created',
+  orderCancelled: 'order-cancelled',
+  orderFilled: 'order-filled',
+  poolClosed: 'pool-closed',
+  poolReverted: 'pool-reverted',
+  poolTokenSet: 'pool-token-set',
+  streamingStatusChanged: 'streamingStatusChanged',
+  winner: 'winner',
+  winnerProposer: 'winner-proposer',
+  revealWinnerAvailable: 'reveal-winner-available',
+  disputeOpened: 'dispute-opened',
+  oracleCreated: 'oracle-created',
+  disputeTimeExtended: 'dispute-time-extented',
+  appealOpened: 'appeal-opened',
+  appealWinnerCalculated: 'appeal-winner-calculated',
+  disputeWinner: 'dispute-winner',
+  appealWinner: 'appeal-winner',
+  claimReward: 'claim-reward',
+  disputeRefund: 'dispute-refund',
+  appealRefund: 'appeal-refund',
+  resolutionRefund: 'resolution-refund',
+  resolverReward: 'resolver-reward',
+  notifications: 'notifications',
+  pool: 'pool',
+} as const satisfies Record<string, RainSocketEvent>;
+
 export interface EnterOptionEventData {
   enterOption: Record<string, any>;
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface ExitOptionEventData {
   exitOption: Record<string, any>;
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface LiquidityEventData {
   enterLiquidity: Record<string, any>;
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface SplitEventData {
   split: Record<string, any>;
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface MergeEventData {
   merge: Record<string, any>;
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface RemoveLiquidityEventData {
   removeLiquidity: Record<string, any>;
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface SyncPriceEventData {
@@ -76,80 +116,80 @@ export interface SyncPriceEventData {
     percentage: number;
     subPoolIndex: number;
   }>;
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface OrderCreatedEventData {
   order: Record<string, any>;
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface OrderCancelledEventData {
   order: Record<string, any>;
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface OrderFilledEventData {
   filledOrder: Record<string, any>;
   pendingOrder?: Record<string, any>;
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface PoolClosedEventData {
-  pool: Record<string, any>;
-  subPool?: Record<string, any>;
+  pool: Pool;
+  subPool?: SubPool;
 }
 
 export interface PoolEventData {
-  pool: Record<string, any>;
-  subMarkets?: Record<string, any>[];
+  pool: Pool;
+  subMarkets?: SubPool[];
 }
 
 export interface WinnerEventData {
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface DisputeOpenedEventData {
-  subPool: Record<string, any>;
+  subPool: SubPool;
   eventType: string;
 }
 
 export interface OracleCreatedEventData {
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface AppealOpenedEventData {
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface DisputeWinnerEventData {
-  subPool: Record<string, any>;
+  subPool: SubPool;
   eventType: string;
 }
 
 export interface AppealWinnerEventData {
-  subPool: Record<string, any>;
+  subPool: SubPool;
   eventType: string;
   winnerFinalized: boolean;
 }
 
 export interface ClaimRewardEventData {
   claimReward: Record<string, any>;
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export interface DisputeRefundEventData {
   claimReward: Record<string, any>;
-  pool: Record<string, any>;
-  subPool: Record<string, any>;
+  pool: Pool;
+  subPool: SubPool;
 }
 
 export class RainSocket {
@@ -332,7 +372,7 @@ export class RainSocket {
     return this.on('oracle-created', poolId, callback);
   }
 
-  onDisputeTimeExtended(poolId: string, callback: (data: { pool: Record<string, any>; subPool: Record<string, any> }) => void): () => void {
+  onDisputeTimeExtended(poolId: string, callback: (data: { pool: Pool; subPool: SubPool }) => void): () => void {
     return this.on('dispute-time-extented', poolId, callback);
   }
 
@@ -340,7 +380,7 @@ export class RainSocket {
     return this.on('appeal-opened', poolId, callback);
   }
 
-  onAppealWinnerCalculated(poolId: string, callback: (data: { subPool: Record<string, any> }) => void): () => void {
+  onAppealWinnerCalculated(poolId: string, callback: (data: { subPool: SubPool }) => void): () => void {
     return this.on('appeal-winner-calculated', poolId, callback);
   }
 
