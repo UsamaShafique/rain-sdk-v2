@@ -56,6 +56,12 @@ const factoryViewAbi = parseAbi([
   'function liquidityFee() view returns (uint256)',
   'function baseToken() view returns (address)',
 ]);
+// Scale of the factory's liquidityFee(). Matches the market contracts'
+// FEE_MAGNIFICATION constant (verified on-chain = 1000 on dev and production
+// markets; the factory itself does not expose it). liquidityFee() = 12 means
+// a 1.2% fee — the unit is per-mille, NOT basis points: dividing by 10000
+// computes every fee 10x too small.
+const FEE_MAGNIFICATION = 1000n;
 export class Rain {
 
   public readonly environment: RainEnvironment;
@@ -102,29 +108,29 @@ export class Rain {
     return buildApproveRawTx(params);
   }
 
-  async getCreateMarketFees(tokenAddress: `0x${string}`, inputAmountWei: bigint): Promise<{ oracleFeePerOption: bigint; liquidityFeeBps: bigint; useBufferApproval: boolean; perOptionBuffer: bigint }> {
+  async getCreateMarketFees(tokenAddress: `0x${string}`, inputAmountWei: bigint): Promise<{ oracleFeePerOption: bigint; liquidityFee: bigint; feeMagnification: bigint; useBufferApproval: boolean; perOptionBuffer: bigint }> {
     const pc = createPublicClient({ chain: arbitrum, transport: http(this.rpcUrl) });
-    const [oracleFeeRaw, liquidityFeeBps, factoryBaseToken] = await Promise.all([
+    const [oracleFeeRaw, liquidityFee, factoryBaseToken] = await Promise.all([
       pc.readContract({ address: this.marketFactory, abi: factoryViewAbi, functionName: 'oracleFixedFee' }),
       pc.readContract({ address: this.marketFactory, abi: factoryViewAbi, functionName: 'liquidityFee' }),
       pc.readContract({ address: this.marketFactory, abi: factoryViewAbi, functionName: 'baseToken' }),
     ]);
     if (tokenAddress.toLowerCase() === (factoryBaseToken as string).toLowerCase()) {
-      return { oracleFeePerOption: oracleFeeRaw as bigint, liquidityFeeBps: liquidityFeeBps as bigint, useBufferApproval: false, perOptionBuffer: 0n };
+      return { oracleFeePerOption: oracleFeeRaw as bigint, liquidityFee: liquidityFee as bigint, feeMagnification: FEE_MAGNIFICATION, useBufferApproval: false, perOptionBuffer: 0n };
     }
     // For non-base tokens (e.g. RAIN): approval = initialLiquidity + (numberOfOptions * 20% of initialLiquidity)
     const perOptionBuffer = inputAmountWei * 20n / 100n;
-    return { oracleFeePerOption: 0n, liquidityFeeBps: liquidityFeeBps as bigint, useBufferApproval: true, perOptionBuffer };
+    return { oracleFeePerOption: 0n, liquidityFee: liquidityFee as bigint, feeMagnification: FEE_MAGNIFICATION, useBufferApproval: true, perOptionBuffer };
   }
 
   async buildCreateMarketTx(params: CreateMarketTxParams): Promise<RawTransaction[]> {
     const tokenConfig = this.getTokenConfig(params.baseToken);
     const tokenDecimals = params.tokenDecimals ?? tokenConfig?.decimals ?? 6;
-    const { oracleFeePerOption, liquidityFeeBps, useBufferApproval, perOptionBuffer } = await this.getCreateMarketFees(params.baseToken, params.inputAmountWei);
+    const { oracleFeePerOption, liquidityFee, feeMagnification, useBufferApproval, perOptionBuffer } = await this.getCreateMarketFees(params.baseToken, params.inputAmountWei);
     if (useBufferApproval) {
       return buildCreateMarketRawTx({ ...params, tokenDecimals, factoryContractAddress: this.marketFactory, apiUrl: this.apiUrl, rpcUrl: this.rpcUrl, disputeTimer: this.distute_initial_timer, oracleFixedFeePerOption: perOptionBuffer });
     }
-    const liquidityFeeAmount = params.inputAmountWei * liquidityFeeBps / 10000n;
+    const liquidityFeeAmount = params.inputAmountWei * liquidityFee / feeMagnification;
     const totalOracleFee = oracleFeePerOption * BigInt(params.no_of_options) + liquidityFeeAmount;
     return buildCreateMarketRawTx({ ...params, tokenDecimals, factoryContractAddress: this.marketFactory, apiUrl: this.apiUrl, rpcUrl: this.rpcUrl, disputeTimer: this.distute_initial_timer, oracleFixedFeePerOption: totalOracleFee / BigInt(params.no_of_options) + 1n });
   }
