@@ -9,6 +9,12 @@ APIs slated for removal are marked `@deprecated` in the type declarations for at
 least one minor release before they are removed, with the replacement named in
 the deprecation notice. Breaking removals land only in a major version.
 
+## [2.5.1] - Add LICENSE
+
+### Added
+- MIT `LICENSE` file at the repo root so GitHub detects the license (npm already
+  declared MIT). No code changes.
+
 ## [2.5.0] - Sell slippage + create-market validation
 
 ### Fixed
