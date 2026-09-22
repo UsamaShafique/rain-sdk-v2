@@ -2,6 +2,23 @@
 
 TypeScript SDK for the Rain prediction markets protocol on Arbitrum One. Provides transaction builders for market creation, trading, liquidity management, order book operations, dispute resolution, and smart account (Account Abstraction) support.
 
+## ⚠️ Security notice — upgrade to >= 2.5.0
+
+Versions **below 2.5.0** build **sell** transactions with no slippage protection by
+default: `buildSellOptionTx` defaulted `minAmountOut` to `0` and the documented
+`slippageTolerance` option was ignored, exposing sells to MEV/sandwich loss.
+**Fixed in 2.5.0** — sells now quote `getSellProceeds` on-chain and apply
+`slippageTolerance` (default 5%). Versions `<2.5.0` are deprecated on npm.
+
+Migration is one line: **`buildSellOptionTx` is now async** — add `await`.
+
+```typescript
+// before (< 2.5.0)
+const tx = rain.buildSellOptionTx({ /* ... */ });
+// after (>= 2.5.0)
+const tx = await rain.buildSellOptionTx({ /* ... */ });
+```
+
 ## Installation
 
 ```bash

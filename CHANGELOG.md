@@ -9,6 +9,12 @@ APIs slated for removal are marked `@deprecated` in the type declarations for at
 least one minor release before they are removed, with the replacement named in
 the deprecation notice. Breaking removals land only in a major version.
 
+## Security
+
+Versions `< 2.5.0` are **deprecated on npm** — they build sell transactions with no
+slippage protection by default (fixed in 2.5.0). See the Security notice in the
+README and the 2.5.0 entry below. Upgrade to `>= 2.5.0`.
+
 ## [2.5.1] - Add LICENSE
 
 ### Added
