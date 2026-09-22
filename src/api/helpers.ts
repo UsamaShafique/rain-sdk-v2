@@ -2,9 +2,6 @@ import { ApiConfig } from './types.js';
 
 export function buildHeaders(config: ApiConfig, contentType?: string): Record<string, string> {
   const headers: Record<string, string> = {};
-  if (config.apiUrl?.includes('ngrok')) {
-    headers['ngrok-skip-browser-warning'] = 'true';
-  }
   if (contentType) {
     headers['Content-Type'] = contentType;
   }

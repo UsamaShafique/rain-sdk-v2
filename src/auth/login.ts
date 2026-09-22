@@ -25,7 +25,6 @@ export async function loginUser(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(apiUrl.includes('ngrok') ? { 'ngrok-skip-browser-warning': 'true' } : {}),
     },
     body: JSON.stringify({
       sign: signature,

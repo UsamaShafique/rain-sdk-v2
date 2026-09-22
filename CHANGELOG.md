@@ -15,6 +15,14 @@ Versions `< 2.5.0` are **deprecated on npm** — they build sell transactions wi
 slippage protection by default (fixed in 2.5.0). See the Security notice in the
 README and the 2.5.0 entry below. Upgrade to `>= 2.5.0`.
 
+## [2.5.2] - Remove ngrok dev header
+
+### Removed
+- Dropped the `ngrok-skip-browser-warning` header handling from all request paths
+  (`buildHeaders`, dispute upload, login, IPFS metadata upload). It was a dev-tunnel
+  convenience gated behind `apiUrl.includes('ngrok')` and never fired against real
+  environments. No behavior change for non-ngrok usage.
+
 ## [2.5.1] - Add LICENSE
 
 ### Added

@@ -21,9 +21,6 @@ export async function createDisputeMessage(
   if (config.accessToken) {
     headers['Authorization'] = `Bearer ${config.accessToken}`;
   }
-  if (config.apiUrl?.includes('ngrok')) {
-    headers['ngrok-skip-browser-warning'] = 'true';
-  }
   // Do not set Content-Type for FormData; the browser sets the boundary automatically.
 
   const res = await fetch(`${config.apiUrl}/dispute/create-dispute-message`, {
