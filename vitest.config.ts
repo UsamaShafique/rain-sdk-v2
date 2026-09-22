@@ -17,8 +17,16 @@ export default defineConfig({
         'dist/**',
         'test/**',
       ],
-      // Thresholds intentionally omitted for the Phase 0 baseline measurement.
-      // They will be set in Phase 1 from the numbers below.
+      // Non-regression floors set just under the Phase 1 measured coverage.
+      // Ratchet these up as more suites land (money-path target: src/tx ≥ 80%).
+      thresholds: {
+        lines: 20,
+        statements: 20,
+        branches: 38,
+        functions: 7,
+        // Money-path builders — held to a higher bar and ratcheting toward 80%.
+        'src/tx/**': { lines: 60, statements: 50, branches: 50, functions: 55 },
+      },
     },
   },
 });
