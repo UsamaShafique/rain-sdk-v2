@@ -15,6 +15,12 @@ Versions `< 2.5.0` are **deprecated on npm** — they build sell transactions wi
 slippage protection by default (fixed in 2.5.0). See the Security notice in the
 README and the 2.5.0 entry below. Upgrade to `>= 2.5.0`.
 
+## [2.5.3] - Update USDR token addresses (dev/stage)
+
+### Changed
+- Updated the USDR token contract address for the `development` and `stage`
+  environments in `ENV_CONFIG`. Production USDR is unchanged. Config-only.
+
 ## [2.5.2] - Remove ngrok dev header
 
 ### Removed
