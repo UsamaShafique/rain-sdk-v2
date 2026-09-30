@@ -62,7 +62,9 @@ export function validateCreateMarketParams(params: CreateMarketTxParams) {
     // "fixed" by normalizeBarValues (which dumped the rounding remainder onto the
     // last option, producing odds the caller never asked for). Reject loudly instead.
     const optionCount = Number(no_of_options);
-    if (optionCount < 2) throw new Error("no_of_options must be at least 2");
+    // 1 option = a binary (single Yes/No) market — the most common type;
+    // 2+ options = a multi-outcome market. Both are valid on-chain.
+    if (optionCount < 1) throw new Error("no_of_options must be at least 1");
     if (marketOptions.length !== optionCount) {
         throw new Error(`marketOptions length (${marketOptions.length}) must equal no_of_options (${optionCount})`);
     }

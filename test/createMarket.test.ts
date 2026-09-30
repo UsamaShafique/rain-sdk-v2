@@ -48,8 +48,12 @@ describe('validateCreateMarketParams cross-field checks', () => {
     expect(() => validateCreateMarketParams(base({ marketOptions: ['Yes'], barValues: [100], no_of_options: 2n }))).toThrow(/marketOptions length|barValues length/);
   });
 
-  it('rejects no_of_options < 2', () => {
-    expect(() => validateCreateMarketParams(base({ no_of_options: 1n, marketOptions: ['Yes'], barValues: [100] }))).toThrow(/at least 2/);
+  it('accepts a 1-option binary market (single Yes/No)', () => {
+    expect(validateCreateMarketParams(base({ no_of_options: 1n, marketOptions: ['Will it rain?'], barValues: [100] }))).toBe(true);
+  });
+
+  it('rejects a negative option count', () => {
+    expect(() => validateCreateMarketParams(base({ no_of_options: -1n, marketOptions: ['a'], barValues: [100] }))).toThrow(/at least 1/);
   });
 
   it('rejects initialYesPrices out of (0, 1e18)', () => {

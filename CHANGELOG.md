@@ -15,6 +15,14 @@ Versions `< 2.5.0` are **deprecated on npm** — they build sell transactions wi
 slippage protection by default (fixed in 2.5.0). See the Security notice in the
 README and the 2.5.0 entry below. Upgrade to `>= 2.5.0`.
 
+## [2.5.4] - Fix: allow 1-option (binary) markets
+
+### Fixed
+- `createMarket` validation rejected `no_of_options: 1` (`must be at least 2`),
+  which blocked binary (single Yes/No) markets — the most common type, and one
+  the contract accepts (verified on-chain). Minimum is now **1** (1 = binary,
+  2+ = multi-outcome). Regression introduced in 2.5.0.
+
 ## [2.5.3] - Update USDR token addresses (dev/stage)
 
 ### Changed

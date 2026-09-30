@@ -199,7 +199,7 @@ const txsRain = await rain.buildCreateMarketTx({
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `marketQuestion` | `string` | The market question |
-| `marketOptions` | `string[]` | Option labels (2-26 options) |
+| `marketOptions` | `string[]` | Option labels. 1 = binary (single Yes/No) market; 2+ = multi-outcome. Length must equal `no_of_options` |
 | `marketTags` | `string[]` | Tags (1-3) |
 | `marketDescription` | `string` | Description |
 | `isPublic` | `boolean` | Public market |
