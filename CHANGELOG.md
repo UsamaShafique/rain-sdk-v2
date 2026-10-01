@@ -15,6 +15,12 @@ Versions `< 2.5.0` are **deprecated on npm** — they build sell transactions wi
 slippage protection by default (fixed in 2.5.0). See the Security notice in the
 README and the 2.5.0 entry below. Upgrade to `>= 2.5.0`.
 
+## [2.5.5] - Revert USDR token addresses (dev/stage)
+
+### Changed
+- Reverted the USDR token address for `development` and `stage` back to their
+  pre-2.5.3 values. Production USDR unchanged (it was never modified). Config-only.
+
 ## [2.5.4] - Fix: allow 1-option (binary) markets
 
 ### Fixed
