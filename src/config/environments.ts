@@ -65,7 +65,7 @@ export const ENV_CONFIG = {
                 oracle_fixed_fee_per_option: 1_000_000_000_000_000_000n,
             } as TokenConfig,
             usdr: {
-                address: "0xC1aeb1D39008337E127698c10f6338E93E5f3369" as `0x${string}`,
+                address: "0x007724B8C1E5261a7d3d59616060aAc4d2B5C0D4" as `0x${string}`,
                 symbol: "USDR",
                 decimals: 18,
                 oracle_fixed_fee_per_option: 1_000_000_000_000_000_000n,
