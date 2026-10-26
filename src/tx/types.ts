@@ -150,6 +150,8 @@ export interface CreateMarketTxParams {
     baseToken: `0x${string}`; // TOKEN contract address
     tradingModel?: TradingModel;
     initialYesPrices?: bigint[];
+    /** Negative-risk coupling flag for multi-outcome markets. Read by the backend from the pool's IPFS metadata (not sent on-chain). */
+    negRisk?: boolean;
     marketImage: string;
     tokenDecimals?: number;
     factoryContractAddress?: `0x${string}`;

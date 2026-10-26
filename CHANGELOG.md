@@ -15,6 +15,14 @@ Versions `< 2.5.0` are **deprecated on npm** — they build sell transactions wi
 slippage protection by default (fixed in 2.5.0). See the Security notice in the
 README and the 2.5.0 entry below. Upgrade to `>= 2.5.0`.
 
+## [2.5.9] - Add negRisk to create-market metadata
+
+### Added
+- `negRisk?: boolean` on `CreateMarketTxParams` (optional, non-breaking), threaded
+  into the pool's IPFS metadata via `uploadMetaData` (defaults to `false`). The
+  backend reads `negRisk` from the pinned metadata to flag negative-risk
+  multi-outcome markets. No on-chain/ABI change; `createPool` is untouched.
+
 ## [2.5.5] - Revert USDR token addresses (dev/stage)
 
 ### Changed

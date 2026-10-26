@@ -31,6 +31,7 @@ export async function uploadMetaData(
         no_of_options,
         creator,
         tradingModel,
+        negRisk,
         apiUrl,
     } = params;
 
@@ -48,6 +49,7 @@ export async function uploadMetaData(
         tags: marketTags,
         poolDescription: marketDescription,
         isAiResolver: isPublicPoolResolverAi,
+        negRisk: negRisk ?? false,
     };
     const res = await fetch(`${apiUrl}/ipfs/upload`, {
         method: "POST",
